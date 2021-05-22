@@ -21,7 +21,7 @@ object Main {
 
     val rddWithoutRetweets = rdd.filter(isRetweet)
 
-    countTotalByHourAndParty(rdd, true)
+
 
 
 
@@ -43,7 +43,12 @@ object Main {
 //
 //    countBySource(rdd)
 
-    countConnectedHashtags(rddWithoutRetweets)
+    //countConnectedHashtags(rddWithoutRetweets)
+
+    //avgTweetLengthByParty(rddWithoutRetweets,true)
+
+    //avgTweetLengthByTime(rddWithoutRetweets,true)
+    avgTweetLengthByTimeAndParty(rddWithoutRetweets,true)
 
     println("Hello World")
   }

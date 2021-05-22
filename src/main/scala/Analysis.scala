@@ -167,6 +167,59 @@ object Analysis {
     }
   }
 
+  def avgTweetLengthByParty(rdd: RDD[Document], saveToDB: Boolean = false): Unit = {
+    val processed = rdd
+      .map(elem => (getParty(elem),getText(elem).length))
+      .groupBy(_._1)
+      .map(elem => (elem._1,(elem._2.reduce((A,B)=> (A._1,A._2+B._2)))._2 / elem._2.size))
+
+    println(processed.collect().mkString("Was ist die Durchschnittslänge der Tweets nach Partein\n", "\n", ""))
+
+    if(saveToDB){
+      val docs = processed.map(elem => Document.parse("{_id: {party: \"" + elem._1 + "\"" +
+        "},length: \"" + elem._2 + "\"" +
+        "}"))
+      docs.saveToMongoDB(WriteConfig(Map("uri" -> "mongodb://phillip:8hVnKoqd@reagent1.f4.htw-berlin.de:27017/examples.avgTweetLengthByParty?authSource=examples")))
+    }
+  }
+
+  def avgTweetLengthByTime(rdd: RDD[Document], saveToDB: Boolean = false): Unit = {
+    val processed = rdd
+      .map(elem => (getTime(elem),getText(elem).length))
+      .groupBy(_._1)
+      .map(elem => (elem._1,(elem._2.reduce((A,B)=> (A._1,A._2+B._2)))._2 / elem._2.size))
+
+    println(processed.collect().mkString("Durchschnittslänge der Tweets nach Zeit \n","\n",""))
+
+    if(saveToDB){
+      val docs = processed.map(elem => Document.parse("{_id: {" +
+        "year: " + elem._1._1 +
+        ",month: " + elem._1._2 +
+        ",day: " + elem._1._3 +
+        ",hour: " + elem._1._4 + "},length: " + elem._2 + "}"))
+      docs.saveToMongoDB(WriteConfig(Map("uri" -> "mongodb://phillip:8hVnKoqd@reagent1.f4.htw-berlin.de:27017/examples.avgTweetLengthByTime?authSource=examples")))
+    }
+  }
+
+  def avgTweetLengthByTimeAndParty(rdd: RDD[Document], saveToDB: Boolean = false): Unit = {
+    val processed = rdd
+      .map(elem => ((getParty(elem), getTime(elem)),getText(elem).length))
+      .groupBy(_._1)
+      .map(elem => (elem._1,(elem._2.reduce((A,B)=> (A._1,A._2+B._2)))._2 / elem._2.size))
+
+    println(processed.collect().mkString("Durchschnittslänge der Tweets nach Zeit und Partei \n","\n",""))
+
+    if(saveToDB){
+      val docs = processed.map(elem => Document.parse("{_id: {party: \"" + elem._1._1 + "\"" +
+        ",year: " + elem._1._2._1 +
+        ",month: " + elem._1._2._2 +
+        ",day: " + elem._1._2._3 +
+        ",hour: " + elem._1._2._4 + "},length: " + elem._2 + "}"))
+      docs.saveToMongoDB(WriteConfig(Map("uri" -> "mongodb://phillip:8hVnKoqd@reagent1.f4.htw-berlin.de:27017/examples.avgTweetLengthByTimeAndParty?authSource=examples")))
+    }
+  }
+
+
   //Textlaenge
   //Reply_settings
 
