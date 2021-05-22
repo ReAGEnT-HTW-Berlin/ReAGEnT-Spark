@@ -1,11 +1,10 @@
-import org.apache.spark.sql.catalyst.expressions.{DayOfMonth, Year}
 import org.bson.Document
 
-import java.time.{LocalDateTime, Month}
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util
-import scala.util.matching.Regex
 import scala.collection.JavaConverters._
+import scala.util.matching.Regex
 
 object Utilities {
   val dtf: DateTimeFormatter = DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm:ss.SSSX")
@@ -52,9 +51,9 @@ object Utilities {
         .map(_.getString("tag")).toList
   }
 
-  def getTime(document:Document):(Int,Month,Int,Int) = {
+  def getTime(document:Document):(Int,Int,Int,Int) = {
     val timeStamp = getTimestamp(document);
-    (timeStamp.getYear,timeStamp.getMonth,timeStamp.getDayOfMonth,timeStamp.getHour)
+    (timeStamp.getYear,timeStamp.getMonth.getValue,timeStamp.getDayOfMonth,timeStamp.getHour)
   }
 
 }

@@ -1,4 +1,4 @@
-import Utilities.{getHashtags, getNouns, getParty, getSource, getText, getTime, getTimestamp}
+import Utilities._
 import com.mongodb.spark.config.WriteConfig
 import com.mongodb.spark.toDocumentRDDFunctions
 import org.apache.spark.rdd.RDD
@@ -16,8 +16,12 @@ object Analysis {
     println(processed.collect().mkString("Wie viele Tweets pro Partei pro Stunde\n", "\n", ""))
 
     if (saveToDB) {
-      val docs = processed.map(elem => Document.parse("{_id: {party: \"" + elem._1._1 + "\",hour: " + elem._1._2 + "},count: " + elem._2 + "}"))
-      docs.saveToMongoDB(WriteConfig(Map("uri" -> "mongodb://phillip:8hVnKoqd@reagent1.f4.htw-berlin.de:27017/examples.ProcessedTweets?authSource=examples")))
+      val docs = processed.map(elem => Document.parse("{_id: {party: \"" + elem._1._1 + "\"" +
+        ",year: " + elem._1._2._1 +
+        ",month: " + elem._1._2._2 +
+        ",day: " + elem._1._2._3 +
+        ",hour: " + elem._1._2._4 + "},count: " + elem._2 + "}"))
+      docs.saveToMongoDB(WriteConfig(Map("uri" -> "mongodb://phillip:8hVnKoqd@reagent1.f4.htw-berlin.de:27017/examples.countTotalByHourAndParty?authSource=examples")))
     }
   }
 

@@ -1,11 +1,7 @@
 import Analysis._
 import Utilities._
-
-import org.apache.spark.sql.SparkSession
 import com.mongodb.spark.{MongoSpark, toDocumentRDDFunctions}
-import com.mongodb.spark.config.WriteConfig
-import com.mongodb.spark.rdd.MongoRDD
-import org.bson.Document
+import org.apache.spark.sql.SparkSession
 
 object Main {
 
@@ -25,7 +21,7 @@ object Main {
 
     val rddWithoutRetweets = rdd.filter(isRetweet)
 
-    countTotalByHourAndParty(rdd)
+    countTotalByHourAndParty(rdd, true)
 
 //    println("Anzahl Retweets: " + rdd.filter(isRetweet).count())
 //
