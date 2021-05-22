@@ -1,12 +1,12 @@
 import Utilities.{getHashtags, getNouns, getParty, getSource, getText, getTimestamp}
 import com.mongodb.spark.config.WriteConfig
-import com.mongodb.spark.rdd.MongoRDD
 import com.mongodb.spark.toDocumentRDDFunctions
+import org.apache.spark.rdd.RDD
 import org.bson.Document
 
 object Analysis {
 
-  def countTotalByHourAndParty(rdd: MongoRDD[Document], saveToDB: Boolean = false): Unit = {
+  def countTotalByHourAndParty(rdd: RDD[Document], saveToDB: Boolean = false): Unit = {
     val processed =
       rdd
         .groupBy(tweet => (getParty(tweet), getTimestamp(tweet).getHour))
@@ -21,7 +21,7 @@ object Analysis {
     }
   }
 
-  def countTotalByParty(rdd: MongoRDD[Document]): Unit = {
+  def countTotalByParty(rdd: RDD[Document]): Unit = {
     println(
       rdd
         .groupBy(getParty)
@@ -32,7 +32,7 @@ object Analysis {
     )
   }
 
-  def countTotalByHour(rdd: MongoRDD[Document]): Unit = {
+  def countTotalByHour(rdd: RDD[Document]): Unit = {
     println(
       rdd
         .groupBy(tweet => getTimestamp(tweet).getHour)
@@ -43,7 +43,7 @@ object Analysis {
     )
   }
 
-  def countByHashtagAndParty(rdd: MongoRDD[Document]): Unit = {
+  def countByHashtagAndParty(rdd: RDD[Document]): Unit = {
     println(
       rdd
         .flatMap(tweet => getHashtags(tweet).map(hashtag => (hashtag, getParty(tweet))))
@@ -55,7 +55,7 @@ object Analysis {
     )
   }
 
-  def countByHashtag(rdd: MongoRDD[Document]): Unit = {
+  def countByHashtag(rdd: RDD[Document]): Unit = {
     println(
       rdd
         .flatMap(tweet => getHashtags(tweet))
@@ -67,7 +67,7 @@ object Analysis {
     )
   }
 
-  def countHashtagsUsedByParty(rdd: MongoRDD[Document]): Unit = {
+  def countHashtagsUsedByParty(rdd: RDD[Document]): Unit = {
     println(
       rdd
         .flatMap(tweet => getHashtags(tweet).map(hashtag => (hashtag, getParty(tweet))))
@@ -79,7 +79,7 @@ object Analysis {
     )
   }
 
-  def countByNounsAndParty(rdd: MongoRDD[Document]): Unit = {
+  def countByNounsAndParty(rdd: RDD[Document]): Unit = {
     println(
       rdd
         .flatMap(tweet => getNouns(getText(tweet)).map(noun => (noun, getParty(tweet))))
@@ -91,7 +91,7 @@ object Analysis {
     )
   }
 
-  def countBySource(rdd: MongoRDD[Document]): Unit = {
+  def countBySource(rdd: RDD[Document]): Unit = {
     println(
       rdd
         .groupBy(getSource)
@@ -99,6 +99,26 @@ object Analysis {
         .sortBy(-_._2)
         .collect()
         .mkString("Von wo werden wie viele Tweets gepostet\n", "\n", "")
+    )
+  }
+
+  def countConnectedHashtags(rdd: RDD[Document]): Unit = {
+    println(
+      rdd
+        .flatMap(tweet => {
+          val hashtags = getHashtags(tweet)
+          if (hashtags.size < 2) {
+            List()
+          } else {
+            (for (i <- 0 until hashtags.size - 1) yield for (j <- i+1 until hashtags.size) yield (hashtags(i), hashtags(j))).flatten
+          }
+        })
+        .filter(tuple => tuple._1 != tuple._2)
+        .groupBy(tuple => if (tuple._1 < tuple._2) tuple else tuple.swap)
+        .mapValues(_.size)
+        .sortBy(-_._2)
+        .take(20)
+        .mkString("Wie oft werden welche Hashtags zusammen gepostet\n", "\n", "")
     )
   }
 

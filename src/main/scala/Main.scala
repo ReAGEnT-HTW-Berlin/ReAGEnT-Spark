@@ -21,25 +21,29 @@ object Main {
 
 
     val sc = sparkSession.sparkContext
-    val rdd = MongoSpark.load(sc)
+    val rdd = MongoSpark.load(sc).rdd
 
-    println("Anzahl Retweets: " + rdd.filter(isRetweet).count())
+    val rddWithoutRetweets = rdd.filter(isRetweet)
 
-    println("Anzahl Tweets gesamt: " + rdd.count())
+//    println("Anzahl Retweets: " + rdd.filter(isRetweet).count())
+//
+//    println("Anzahl Tweets gesamt: " + rdd.count())
+//
+//    println("Erster Tweet: " + rdd.first())
+//
+//    countTotalByHourAndParty(rdd)
+//    countTotalByParty(rdd)
+//    countTotalByHour(rdd)
+//
+//    countByHashtagAndParty(rdd)
+//    countByHashtag(rdd)
+//    countHashtagsUsedByParty(rdd)
+//
+//    countByNounsAndParty(rdd)
+//
+//    countBySource(rdd)
 
-    println("Erster Tweet: " + rdd.first())
-
-    countTotalByHourAndParty(rdd)
-    countTotalByParty(rdd)
-    countTotalByHour(rdd)
-
-    countByHashtagAndParty(rdd)
-    countByHashtag(rdd)
-    countHashtagsUsedByParty(rdd)
-
-    countByNounsAndParty(rdd)
-
-    countBySource(rdd)
+    countConnectedHashtags(rddWithoutRetweets)
 
     println("Hello World")
   }
