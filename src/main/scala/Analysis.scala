@@ -1,4 +1,4 @@
-import Utilities.{getHashtags, getNouns, getParty, getSource, getText, getTimestamp}
+import Utilities.{getHashtags, getNouns, getParty, getSource, getText, getTime, getTimestamp}
 import com.mongodb.spark.config.WriteConfig
 import com.mongodb.spark.toDocumentRDDFunctions
 import org.apache.spark.rdd.RDD
@@ -9,7 +9,7 @@ object Analysis {
   def countTotalByHourAndParty(rdd: RDD[Document], saveToDB: Boolean = false): Unit = {
     val processed =
       rdd
-        .groupBy(tweet => (getParty(tweet), getTimestamp(tweet).getHour))
+        .groupBy(tweet => (getParty(tweet),getTime(tweet)))
         .mapValues(_.size)
         .sortBy(elem => (elem._1._2, -elem._2))
 
@@ -35,7 +35,7 @@ object Analysis {
   def countTotalByHour(rdd: RDD[Document]): Unit = {
     println(
       rdd
-        .groupBy(tweet => getTimestamp(tweet).getHour)
+        .groupBy(tweet => getTime(tweet))
         .mapValues(_.size)
         .sortBy(_._1)
         .collect()

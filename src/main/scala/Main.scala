@@ -25,6 +25,8 @@ object Main {
 
     val rddWithoutRetweets = rdd.filter(isRetweet)
 
+    countTotalByHourAndParty(rdd)
+
 //    println("Anzahl Retweets: " + rdd.filter(isRetweet).count())
 //
 //    println("Anzahl Tweets gesamt: " + rdd.count())
