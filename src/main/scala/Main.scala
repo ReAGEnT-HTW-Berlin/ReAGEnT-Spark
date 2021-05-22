@@ -23,6 +23,8 @@ object Main {
 
     countTotalByHourAndParty(rdd, true)
 
+
+
 //    println("Anzahl Retweets: " + rdd.filter(isRetweet).count())
 //
 //    println("Anzahl Tweets gesamt: " + rdd.count())
