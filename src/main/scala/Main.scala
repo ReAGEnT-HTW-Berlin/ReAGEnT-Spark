@@ -14,7 +14,6 @@ object Main {
     val sparkSession = SparkSession.builder()
       .master("local")
       .appName("MongoSparkConnectorIntro")
-      //.config("spark.mongodb.input.uri", "mongodb://phillip:8hVnKoqd@reagent1.f4.htw-berlin.de:27017/examples.SampleData?authSource=examples")
 //      .config("spark.mongodb.input.uri", "mongodb://phillip:8hVnKoqd@reagent1.f4.htw-berlin.de:27017/examples.bson-gaertner?authSource=examples")
       .config("spark.mongodb.input.uri", "mongodb://phillip:8hVnKoqd@reagent1.f4.htw-berlin.de:27017/examples.tweets_bundestag_aktuelle_legislaturperiode?authSource=examples")
       .config("spark.testing.memory", 2147480000)
