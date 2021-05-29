@@ -3,6 +3,8 @@ import Utilities._
 import com.mongodb.spark.{MongoSpark, toDocumentRDDFunctions}
 import org.apache.spark.sql.SparkSession
 
+import java.time.LocalDateTime
+
 object Main {
 
   def main(args: Array[String]): Unit = {
@@ -23,11 +25,21 @@ object Main {
     println("Elapsed time: " + (t1 - t0)/1000000000.0 + "s")
 
 
+    val tweets = MongoSpark.load(sparkSession)
+    tweets.createOrReplaceTempView("tweets")
+
     val sc = sparkSession.sparkContext
     val rdd = MongoSpark.load(sc).rdd
 
+
     val t2 = System.nanoTime()
     println("Elapsed time: " + (t2 - t1)/1000000000.0 + "s")
+
+
+    val referenceTime = LocalDateTime.now().minusDays(7).toString.splitAt(10)._1
+
+    val tweetsSinceX = sparkSession.sql("SELECT * FROM tweets WHERE date >= \"" + referenceTime + "\"")
+
 
 
 //    countTotalByHourAndPartyAndBoth(rdd)
