@@ -9,7 +9,7 @@ object Analysis {
   def countTotalByHourAndPartyAndBoth(rdd: RDD[Document], saveToDB: Boolean = false): Unit = {
     val processedAll =
       rdd
-        .groupBy(tweet => (getParty(tweet),getTime(tweet)))
+        .groupBy(tweet => (getParty(tweet), getTime(tweet)))
         .mapValues(_.size)
         .sortBy(elem => (elem._1._2, -elem._2))
 
@@ -53,7 +53,7 @@ object Analysis {
         .sortBy(-_._2)
     println(processed.take(20).mkString("Wie oft nutzt welche Partei welchen Hashtag\n", "\n", ""))
 
-    if(saveToDB){
+    if (saveToDB) {
       val docs = processed.map(elem => Document.parse("{_id: {party: \"" + elem._1._2 + "\"" + "hashtag: \"" + elem._1._1 + "\"" +
         "}, count: " + elem._2 + "}"))
       docs.saveToMongoDB(WriteConfig(Map("uri" -> "mongodb://phillip:8hVnKoqd@reagent1.f4.htw-berlin.de:27017/examples.countByHashtagAndParty?authSource=examples")))
@@ -70,7 +70,7 @@ object Analysis {
 
     println(processed.take(10).mkString("Wie oft wurde welcher Hashtag genutzt\n", "\n", ""))
 
-    if(saveToDB){
+    if (saveToDB) {
       val docs = processed.map(elem => Document.parse("{_id: {hashtag: \"" + elem._1 + "\"" + "}, count: " + elem._2 + "}"))
       docs.saveToMongoDB(WriteConfig(Map("uri" -> "mongodb://phillip:8hVnKoqd@reagent1.f4.htw-berlin.de:27017/examples.countByHashtag?authSource=examples")))
     }
@@ -86,7 +86,7 @@ object Analysis {
 
     println(processed.take(10).mkString("Anzahl genutzter Hashtags pro Partei\n", "\n", ""))
 
-    if(saveToDB){
+    if (saveToDB) {
       val docs = processed.map(elem => Document.parse("{_id: {party: \"" + elem._1 + "\"" + "}, count: " + elem._2 + "}"))
       docs.saveToMongoDB(WriteConfig(Map("uri" -> "mongodb://phillip:8hVnKoqd@reagent1.f4.htw-berlin.de:27017/examples.countHashtagsUsedByParty?authSource=examples")))
     }
@@ -102,7 +102,7 @@ object Analysis {
 
     println(processed.take(20).mkString("Wie oft nutzt welche Partei welche Nomen\n", "\n", ""))
 
-    if(saveToDB){
+    if (saveToDB) {
       val docs = processed.map(elem => Document.parse("{_id: {party: \"" + elem._1._2 + "\"" +
         ",noun: \"" + elem._1._1 + "\"" +
         "}, count: " + elem._2 + "}"))
@@ -119,7 +119,7 @@ object Analysis {
 
     println(processed.collect().mkString("Von wo werden wie viele Tweets gepostet\n", "\n", ""))
 
-    if(saveToDB){
+    if (saveToDB) {
       val docs = processed.map(elem => Document.parse("{_id: {source: \"" + elem._1 + "\"" + "}, count: " + elem._2 + "}"))
       docs.saveToMongoDB(WriteConfig(Map("uri" -> "mongodb://phillip:8hVnKoqd@reagent1.f4.htw-berlin.de:27017/examples.countBySource?authSource=examples")))
     }
@@ -133,7 +133,7 @@ object Analysis {
           if (hashtags.size < 2) {
             List()
           } else {
-            (for (i <- 0 until hashtags.size - 1) yield for (j <- i+1 until hashtags.size) yield (hashtags(i), hashtags(j))).flatten
+            (for (i <- 0 until hashtags.size - 1) yield for (j <- i + 1 until hashtags.size) yield (hashtags(i), hashtags(j))).flatten
           }
         })
         .filter(tuple => tuple._1 != tuple._2)
@@ -143,7 +143,7 @@ object Analysis {
 
     println(processed.take(20).mkString("Wie oft werden welche Hashtags zusammen gepostet\n", "\n", ""))
 
-    if(saveToDB){
+    if (saveToDB) {
       val docs = processed.map(elem => Document.parse("{_id: {hashtag1: \"" + elem._1._1 + "\"" +
         ",hashtag2: \"" + elem._1._2 + "\"" +
         "}, count: " + elem._2 + "}"))
@@ -151,59 +151,44 @@ object Analysis {
     }
   }
 
-  def avgTweetLengthByParty(rdd: RDD[Document], saveToDB: Boolean = false): Unit = {
+  def avgTweetLengthByTimeAndPartyAndBoth(rdd: RDD[Document], saveToDB: Boolean = false): Unit = {
     val processed = rdd
-      .map(elem => (getParty(elem),getText(elem).length))
+      .map(elem => ((getParty(elem), getTime(elem)), getText(elem).length))
       .groupBy(_._1)
-      .map(elem => (elem._1,(elem._2.reduce((A,B)=> (A._1,A._2+B._2)))._2 / elem._2.size))
+      .map(elem => (elem._1, (elem._2.reduce((A, B) => (A._1, A._2 + B._2)))._2 / elem._2.size))
 
-    println(processed.collect().mkString("Was ist die Durchschnittslänge der Tweets nach Partein\n", "\n", ""))
+    println(processed.collect().mkString("Durchschnittslänge der Tweets nach Zeit und Partei \n", "\n", ""))
 
-    if(saveToDB){
-      val docs = processed.map(elem => Document.parse("{_id: {party: \"" + elem._1 + "\"" +
-        "},length: \"" + elem._2 + "\"" +
-        "}"))
-      docs.saveToMongoDB(WriteConfig(Map("uri" -> "mongodb://phillip:8hVnKoqd@reagent1.f4.htw-berlin.de:27017/examples.avgTweetLengthByParty?authSource=examples")))
-    }
-  }
+    val processedByParty = processed.groupBy(_._1._1).mapValues(x => x.map(_._2).sum / x.size)
 
-  def avgTweetLengthByTime(rdd: RDD[Document], saveToDB: Boolean = false): Unit = {
-    val processed = rdd
-      .map(elem => (getTime(elem),getText(elem).length))
-      .groupBy(_._1)
-      .map(elem => (elem._1,(elem._2.reduce((A,B)=> (A._1,A._2+B._2)))._2 / elem._2.size))
+    println(processedByParty.collect().mkString("Durchschnittslänge der Tweets nach Partei \n", "\n", ""))
 
-    println(processed.collect().mkString("Durchschnittslänge der Tweets nach Zeit \n","\n",""))
+    val processedByTime = processed.groupBy(_._1._2).mapValues(x => x.map(_._2).sum / x.size)
 
-    if(saveToDB){
-      val docs = processed.map(elem => Document.parse("{_id: {" +
-        "year: " + elem._1._1 +
-        ",month: " + elem._1._2 +
-        ",day: " + elem._1._3 +
-        ",hour: " + elem._1._4 + "},length: " + elem._2 + "}"))
-      docs.saveToMongoDB(WriteConfig(Map("uri" -> "mongodb://phillip:8hVnKoqd@reagent1.f4.htw-berlin.de:27017/examples.avgTweetLengthByTime?authSource=examples")))
-    }
-  }
+    println(processedByTime.collect().mkString("Durchschnittslänge der Tweets nach Zeit \n", "\n", ""))
 
-  def avgTweetLengthByTimeAndParty(rdd: RDD[Document], saveToDB: Boolean = false): Unit = {
-    val processed = rdd
-      .map(elem => ((getParty(elem), getTime(elem)),getText(elem).length))
-      .groupBy(_._1)
-      .map(elem => (elem._1,(elem._2.reduce((A,B)=> (A._1,A._2+B._2)))._2 / elem._2.size))
-
-    println(processed.collect().mkString("Durchschnittslänge der Tweets nach Zeit und Partei \n","\n",""))
-
-    if(saveToDB){
-      val docs = processed.map(elem => Document.parse("{_id: {party: \"" + elem._1._1 + "\"" +
+    if (saveToDB) {
+      val processedDocs = processed.map(elem => Document.parse("{_id: {party: \"" + elem._1._1 + "\"" +
         ",year: " + elem._1._2._1 +
         ",month: " + elem._1._2._2 +
         ",day: " + elem._1._2._3 +
         ",hour: " + elem._1._2._4 + "},length: " + elem._2 + "}"))
-      docs.saveToMongoDB(WriteConfig(Map("uri" -> "mongodb://phillip:8hVnKoqd@reagent1.f4.htw-berlin.de:27017/examples.avgTweetLengthByTimeAndParty?authSource=examples")))
+      processedDocs.saveToMongoDB(WriteConfig(Map("uri" -> "mongodb://phillip:8hVnKoqd@reagent1.f4.htw-berlin.de:27017/examples.avgTweetLengthByTimeAndParty?authSource=examples")))
+
+      val processedByPartyDocs = processedByParty.map(elem => Document.parse("{_id: {party: \"" + elem._1 + "\"" +
+        "},length: \"" + elem._2 + "\"" +
+        "}"))
+      processedByPartyDocs.saveToMongoDB(WriteConfig(Map("uri" -> "mongodb://phillip:8hVnKoqd@reagent1.f4.htw-berlin.de:27017/examples.avgTweetLengthByParty?authSource=examples")))
+
+      val processedByTimeDocs = processedByTime.map(elem => Document.parse("{_id: {" +
+        "year: " + elem._1._1 +
+        ",month: " + elem._1._2 +
+        ",day: " + elem._1._3 +
+        ",hour: " + elem._1._4 + "},length: " + elem._2 + "}"))
+      processedByTimeDocs.saveToMongoDB(WriteConfig(Map("uri" -> "mongodb://phillip:8hVnKoqd@reagent1.f4.htw-berlin.de:27017/examples.avgTweetLengthByTime?authSource=examples")))
     }
+
   }
-
-
-  //Reply_settings
+//Reply_settings
 
 }

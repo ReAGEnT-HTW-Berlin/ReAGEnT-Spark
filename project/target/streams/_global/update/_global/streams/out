@@ -1,3 +1,4 @@
 [debug] not up to date. inChanged = true, force = false
-[debug] Updating ProjectRef(uri("file:/C:/Users/inver/Desktop/twitter-projekt/ReAGEnT-Spark/project/"), "reagent-spark-build")...
-[debug] Done updating ProjectRef(uri("file:/C:/Users/inver/Desktop/twitter-projekt/ReAGEnT-Spark/project/"), "reagent-spark-build")
+[debug] Updating ProjectRef(uri("file:/C:/Users/timko/Desktop/Aufgaben/REAGENT/REAGENT%20SPARK/ReAGEnT-Spark/project/"), "reagent-spark-build")...
+[warn] Unrecognized repository Scala Plugin Bundled Repository, ignoring it
+[debug] Done updating ProjectRef(uri("file:/C:/Users/timko/Desktop/Aufgaben/REAGENT/REAGENT%20SPARK/ReAGEnT-Spark/project/"), "reagent-spark-build")
