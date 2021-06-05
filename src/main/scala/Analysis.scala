@@ -29,20 +29,20 @@ object Analysis {
         ",month: " + elem._1._2._2 +
         ",day: " + elem._1._2._3 +
         ",hour: " + elem._1._2._4 + "},count: " + elem._2 + "}"))
-      docsAll.saveToMongoDB(WriteConfig(Map("uri" -> "mongodb://phillip:8hVnKoqd@reagent1.f4.htw-berlin.de:27017/examples.countTotalByHourAndParty?authSource=examples")))
+      docsAll.saveToMongoDB(WriteConfig(Map("uri" -> (sys.env("REAGENT_MONGO") + "examples.countTotalByHourAndParty?authSource=examples"))))
 
       val docsParty = processedParty.map(elem => Document.parse("{_id: {party: \"" + elem._1 + "\"},count: " + elem._2 + "}"))
-      docsParty.saveToMongoDB(WriteConfig(Map("uri" -> "mongodb://phillip:8hVnKoqd@reagent1.f4.htw-berlin.de:27017/examples.countTotalByParty?authSource=examples")))
+      docsParty.saveToMongoDB(WriteConfig(Map("uri" -> (sys.env("REAGENT_MONGO") + "examples.countTotalByParty?authSource=examples"))))
 
       val docsHour = processedHour.map(elem => Document.parse("{_id: {" +
         ",year: " + elem._1._1 +
         ",month: " + elem._1._2 +
         ",day: " + elem._1._3 +
         ",hour: " + elem._1._4 + "},count: " + elem._2 + "}"))
-      docsHour.saveToMongoDB(WriteConfig(Map("uri" -> "mongodb://phillip:8hVnKoqd@reagent1.f4.htw-berlin.de:27017/examples.countTotalByHour?authSource=examples")))
+      docsHour.saveToMongoDB(WriteConfig(Map("uri" -> (sys.env("REAGENT_MONGO") + "examples.countTotalByHour?authSource=examples"))))
 
       val docsYearAndParty = processedYearAndParty.map(elem => Document.parse("{_id: {party: \"" + elem._1._1 + "\",year: " + elem._1._2 + "},count: " + elem._2 + "}"))
-      docsYearAndParty.saveToMongoDB(WriteConfig(Map("uri" -> "mongodb://phillip:8hVnKoqd@reagent1.f4.htw-berlin.de:27017/examples.countTotalByYear?authSource=examples")))
+      docsYearAndParty.saveToMongoDB(WriteConfig(Map("uri" -> (sys.env("REAGENT_MONGO") + "examples.countTotalByYear?authSource=examples"))))
 
     }
   }
@@ -59,7 +59,7 @@ object Analysis {
     if (saveToDB) {
       val docs = processed.map(elem => Document.parse("{_id: {party: \"" + elem._1._2 + "\"" + "hashtag: \"" + elem._1._1 + "\"" +
         "}, count: " + elem._2 + "}"))
-      docs.saveToMongoDB(WriteConfig(Map("uri" -> "mongodb://phillip:8hVnKoqd@reagent1.f4.htw-berlin.de:27017/examples.countByHashtagAndParty?authSource=examples")))
+      docs.saveToMongoDB(WriteConfig(Map("uri" -> (sys.env("REAGENT_MONGO") + "examples.countByHashtagAndParty?authSource=examples"))))
     }
   }
 
@@ -75,7 +75,7 @@ object Analysis {
 
     if (saveToDB) {
       val docs = processed.map(elem => Document.parse("{_id: {hashtag: \"" + elem._1 + "\"" + "}, count: " + elem._2 + "}"))
-      docs.saveToMongoDB(WriteConfig(Map("uri" -> "mongodb://phillip:8hVnKoqd@reagent1.f4.htw-berlin.de:27017/examples.countByHashtag?authSource=examples")))
+      docs.saveToMongoDB(WriteConfig(Map("uri" -> (sys.env("REAGENT_MONGO") + "examples.countByHashtag?authSource=examples"))))
     }
   }
 
@@ -91,7 +91,7 @@ object Analysis {
 
     if (saveToDB) {
       val docs = processed.map(elem => Document.parse("{_id: {party: \"" + elem._1 + "\"" + "}, count: " + elem._2 + "}"))
-      docs.saveToMongoDB(WriteConfig(Map("uri" -> "mongodb://phillip:8hVnKoqd@reagent1.f4.htw-berlin.de:27017/examples.countHashtagsUsedByParty?authSource=examples")))
+      docs.saveToMongoDB(WriteConfig(Map("uri" -> (sys.env("REAGENT_MONGO") + "examples.countHashtagsUsedByParty?authSource=examples"))))
     }
   }
 
@@ -109,7 +109,7 @@ object Analysis {
       val docs = processed.map(elem => Document.parse("{_id: {party: \"" + elem._1._2 + "\"" +
         ",noun: \"" + elem._1._1 + "\"" +
         "}, count: " + elem._2 + "}"))
-      docs.saveToMongoDB(WriteConfig(Map("uri" -> "mongodb://phillip:8hVnKoqd@reagent1.f4.htw-berlin.de:27017/examples.countByNounsAndParty?authSource=examples")))
+      docs.saveToMongoDB(WriteConfig(Map("uri" -> (sys.env("REAGENT_MONGO") + "examples.countByNounsAndParty?authSource=examples"))))
     }
   }
 
@@ -124,7 +124,7 @@ object Analysis {
 
     if (saveToDB) {
       val docs = processed.map(elem => Document.parse("{_id: {source: \"" + elem._1 + "\"" + "}, count: " + elem._2 + "}"))
-      docs.saveToMongoDB(WriteConfig(Map("uri" -> "mongodb://phillip:8hVnKoqd@reagent1.f4.htw-berlin.de:27017/examples.countBySource?authSource=examples")))
+      docs.saveToMongoDB(WriteConfig(Map("uri" -> (sys.env("REAGENT_MONGO") + "examples.countBySource?authSource=examples"))))
     }
   }
 
@@ -150,7 +150,7 @@ object Analysis {
       val docs = processed.map(elem => Document.parse("{_id: {hashtag1: \"" + elem._1._1 + "\"" +
         ",hashtag2: \"" + elem._1._2 + "\"" +
         "}, count: " + elem._2 + "}"))
-      docs.saveToMongoDB(WriteConfig(Map("uri" -> "mongodb://phillip:8hVnKoqd@reagent1.f4.htw-berlin.de:27017/examples.countConnectedHashtags?authSource=examples")))
+      docs.saveToMongoDB(WriteConfig(Map("uri" -> (sys.env("REAGENT_MONGO") + "examples.countConnectedHashtags?authSource=examples"))))
     }
   }
 
@@ -176,19 +176,19 @@ object Analysis {
         ",month: " + elem._1._2._2 +
         ",day: " + elem._1._2._3 +
         ",hour: " + elem._1._2._4 + "},length: " + elem._2 + "}"))
-      processedDocs.saveToMongoDB(WriteConfig(Map("uri" -> "mongodb://phillip:8hVnKoqd@reagent1.f4.htw-berlin.de:27017/examples.avgTweetLengthByTimeAndParty?authSource=examples")))
+      processedDocs.saveToMongoDB(WriteConfig(Map("uri" -> (sys.env("REAGENT_MONGO") + "examples.avgTweetLengthByTimeAndParty?authSource=examples"))))
 
       val processedByPartyDocs = processedByParty.map(elem => Document.parse("{_id: {party: \"" + elem._1 + "\"" +
         "},length: \"" + elem._2 + "\"" +
         "}"))
-      processedByPartyDocs.saveToMongoDB(WriteConfig(Map("uri" -> "mongodb://phillip:8hVnKoqd@reagent1.f4.htw-berlin.de:27017/examples.avgTweetLengthByParty?authSource=examples")))
+      processedByPartyDocs.saveToMongoDB(WriteConfig(Map("uri" -> (sys.env("REAGENT_MONGO") + "examples.avgTweetLengthByParty?authSource=examples"))))
 
       val processedByTimeDocs = processedByTime.map(elem => Document.parse("{_id: {" +
         "year: " + elem._1._1 +
         ",month: " + elem._1._2 +
         ",day: " + elem._1._3 +
         ",hour: " + elem._1._4 + "},length: " + elem._2 + "}"))
-      processedByTimeDocs.saveToMongoDB(WriteConfig(Map("uri" -> "mongodb://phillip:8hVnKoqd@reagent1.f4.htw-berlin.de:27017/examples.avgTweetLengthByTime?authSource=examples")))
+      processedByTimeDocs.saveToMongoDB(WriteConfig(Map("uri" -> (sys.env("REAGENT_MONGO") + "examples.avgTweetLengthByTime?authSource=examples"))))
     }
 
   }

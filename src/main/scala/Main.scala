@@ -14,8 +14,8 @@ object Main {
     val sparkSession = SparkSession.builder()
       .master("local")
       .appName("MongoSparkConnectorIntro")
-      //      .config("spark.mongodb.input.uri", "mongodb://phillip:8hVnKoqd@reagent1.f4.htw-berlin.de:27017/examples.bson-gaertner?authSource=examples")
-      .config("spark.mongodb.input.uri", "mongodb://phillip:8hVnKoqd@reagent1.f4.htw-berlin.de:27017/examples.tweets_bundestag_aktuelle_legislaturperiode?authSource=examples")
+      //      .config("spark.mongodb.input.uri", sys.env("REAGENT_MONGO") + "examples.bson-gaertner?authSource=examples")
+      .config("spark.mongodb.input.uri", sys.env("REAGENT_MONGO") + "examples.tweets_bundestag_aktuelle_legislaturperiode?authSource=examples")
       .config("spark.testing.memory", 2147480000)
       .getOrCreate()
 
@@ -72,7 +72,7 @@ object Main {
     val t3 = System.nanoTime()
     println("Elapsed time Filter: " + (t3 - t2) / 1000000000.0 + "s")
 
-    countTotalByHourAndPartyAndBothAndYear(rdd, saveToDB = true)
+    countTotalByHourAndPartyAndBothAndYear(tweetsSinceX)
 
     val t4 = System.nanoTime()
     println("Elapsed time Berechnung1: " + (t4 - t3) / 1000000000.0 + "s")
