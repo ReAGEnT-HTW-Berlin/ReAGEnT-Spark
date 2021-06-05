@@ -37,8 +37,6 @@ object Main {
 
     val referenceTime = LocalDateTime.now().minusDays(7).toString.splitAt(10)._1
 
-    val tweetsSinceX = sparkSession.sql("SELECT * FROM tweets WHERE date >= \"" + referenceTime + "\"")
-
 
 
     //    countTotalByHourAndPartyAndBoth(rdd)
@@ -69,20 +67,15 @@ object Main {
     //rdd.map(x => getTime(x)).filter(_.toString())
 
     //tweetsSinceX aber als Rdd[Document]
-    val tweetsSinceXV2 = rdd.filter(_.get("created_at").toString.splitAt(10)._1 > referenceTime).cache()
+    val tweetsSinceX = rdd.filter(_.get("created_at").toString.splitAt(10)._1 > referenceTime).cache()
 
     val t3 = System.nanoTime()
     println("Elapsed time Filter: " + (t3 - t2) / 1000000000.0 + "s")
 
-    countTotalByHourAndPartyAndBoth( tweetsSinceXV2,false)
+    countTotalByHourAndPartyAndBothAndYear(rdd, saveToDB = true)
 
     val t4 = System.nanoTime()
     println("Elapsed time Berechnung1: " + (t4 - t3) / 1000000000.0 + "s")
-
-    avgTweetLengthByTimeAndPartyAndBoth( tweetsSinceXV2,false)
-
-    val t5 = System.nanoTime()
-    println("Elapsed time Berechnung2: " + (t5 - t4) / 1000000000.0 + "s")
     println("Hello World")
   }
 

@@ -6,22 +6,22 @@ import org.bson.Document
 
 object Analysis {
 
-  def countTotalByHourAndPartyAndBoth(rdd: RDD[Document], saveToDB: Boolean = false): Unit = {
+  def countTotalByHourAndPartyAndBothAndYear(rdd: RDD[Document], saveToDB: Boolean = false): Unit = {
     val processedAll =
       rdd
         .groupBy(tweet => (getParty(tweet), getTime(tweet)))
         .mapValues(_.size)
         .sortBy(elem => (elem._1._2, -elem._2))
-
     println(processedAll.collect().mkString("Wie viele Tweets pro Partei pro Stunde\n", "\n", ""))
 
     val processedParty = processedAll.groupBy(_._1._1).mapValues(_.map(_._2).sum).sortBy(-_._2)
-
     println(processedParty.collect().mkString("Wie viele Tweets pro Partei\n", "\n", ""))
 
     val processedHour = processedAll.groupBy(_._1._2).mapValues(_.map(_._2).sum).sortBy(_._1)
-
     println(processedHour.collect().mkString("Wie viele Tweets pro Stunde\n", "\n", ""))
+
+    val processedYearAndParty = processedAll.groupBy(elem => (elem._1._1, elem._1._2._1)).mapValues(_.map(_._2).sum).sortBy(elem => (elem._1._2, -elem._2))
+    println(processedYearAndParty.collect().mkString("Wie viele Tweets pro Jahr pro Partei\n", "\n", ""))
 
     if (saveToDB) {
       val docsAll = processedAll.map(elem => Document.parse("{_id: {party: \"" + elem._1._1 + "\"" +
@@ -40,6 +40,9 @@ object Analysis {
         ",day: " + elem._1._3 +
         ",hour: " + elem._1._4 + "},count: " + elem._2 + "}"))
       docsHour.saveToMongoDB(WriteConfig(Map("uri" -> "mongodb://phillip:8hVnKoqd@reagent1.f4.htw-berlin.de:27017/examples.countTotalByHour?authSource=examples")))
+
+      val docsYearAndParty = processedYearAndParty.map(elem => Document.parse("{_id: {party: \"" + elem._1._1 + "\",year: " + elem._1._2 + "},count: " + elem._2 + "}"))
+      docsYearAndParty.saveToMongoDB(WriteConfig(Map("uri" -> "mongodb://phillip:8hVnKoqd@reagent1.f4.htw-berlin.de:27017/examples.countTotalByYear?authSource=examples")))
 
     }
   }
