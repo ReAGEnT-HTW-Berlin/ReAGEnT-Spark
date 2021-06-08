@@ -15,7 +15,7 @@ object Main {
       .master("local")
       .appName("MongoSparkConnectorIntro")
       //      .config("spark.mongodb.input.uri", sys.env("REAGENT_MONGO") + "examples.bson-gaertner?authSource=examples")
-      .config("spark.mongodb.input.uri", sys.env("REAGENT_MONGO") + "examples.tweets_bundestag_aktuelle_legislaturperiode?authSource=examples")
+      .config("spark.mongodb.input.uri", sys.env("REAGENT_MONGO") + "examples.tweets_bundestag_legislatur?authSource=examples")
       .config("spark.testing.memory", 2147480000)
       .getOrCreate()
 
@@ -35,7 +35,10 @@ object Main {
     println("Elapsed time: " + (t2 - t1) / 1000000000.0 + "s")
 
 
-    val referenceTime = LocalDateTime.now().minusDays(7).toString.splitAt(10)._1
+
+
+
+
 
 
 
@@ -66,13 +69,16 @@ object Main {
 
     //rdd.map(x => getTime(x)).filter(_.toString())
 
+
     //tweetsSinceX aber als Rdd[Document]
+    val referenceTime = LocalDateTime.now().minusDays(70).toString.splitAt(10)._1
+
     val tweetsSinceX = rdd.filter(_.get("created_at").toString.splitAt(10)._1 > referenceTime).cache()
 
     val t3 = System.nanoTime()
     println("Elapsed time Filter: " + (t3 - t2) / 1000000000.0 + "s")
 
-    countTotalByHourAndPartyAndBothAndYear(tweetsSinceX)
+    countTotalByHourAndPartyAndBothAndYear(rdd, true)
 
     val t4 = System.nanoTime()
     println("Elapsed time Berechnung1: " + (t4 - t3) / 1000000000.0 + "s")

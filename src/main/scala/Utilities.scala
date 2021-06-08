@@ -59,9 +59,9 @@ object Utilities {
       .get("hashtags").asInstanceOf[util.ArrayList[String]].asScala.toList
   }
 
-  def getTime(document: Document): (Int, Int, Int, Int) = {
+  def getTime(document: Document): (Int, Int, Int, Int, Int) = {
     val timeStamp = getTimestamp(document);
-    (timeStamp.getYear, timeStamp.getMonth.getValue, timeStamp.getDayOfMonth, timeStamp.getHour)
+    (timeStamp.getYear, timeStamp.getMonth.getValue, timeStamp.getDayOfMonth,timeStamp.getDayOfYear, timeStamp.getHour)
   }
 
   def saveTweetsFromThisPeriod(rdd: RDD[Document]): Unit = {
@@ -72,5 +72,4 @@ object Utilities {
       )
     after2017.saveToMongoDB(WriteConfig(Map("uri" -> "mongodb://phillip:8hVnKoqd@reagent1.f4.htw-berlin.de:27017/examples.tweets_bundestag_aktuelle_legislaturperiode?authSource=examples")))
   }
-
 }
