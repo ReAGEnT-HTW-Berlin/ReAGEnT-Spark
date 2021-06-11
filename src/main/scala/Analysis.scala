@@ -6,7 +6,7 @@ import org.bson.Document
 
 object Analysis {
 
-  def countTotalByHourAndPartyAndBothAndYear(rdd: RDD[Document], saveToDB: Boolean = false): Unit = {
+  def countTotal(rdd: RDD[Document], saveToDB: Boolean = false): Unit = {
     val processedAll =
       rdd
         .groupBy(tweet => (getParty(tweet), getTime(tweet)))
@@ -70,7 +70,7 @@ object Analysis {
     }
   }
 
-  def countByHashtagAndParty(rdd: RDD[Document], saveToDB: Boolean = false): Unit = {
+  def countByHashtag(rdd: RDD[Document], saveToDB: Boolean = false): Unit = {
     val processed =
       rdd
         .flatMap(tweet => getHashtags(tweet).map(hashtag => (hashtag, getParty(tweet))))
@@ -86,7 +86,7 @@ object Analysis {
     }
   }
 
-  def countByHashtag(rdd: RDD[Document], saveToDB: Boolean = false): Unit = {
+  /*def countByHashtag(rdd: RDD[Document], saveToDB: Boolean = false): Unit = {
     val processed =
       rdd
         .flatMap(tweet => getHashtags(tweet))
@@ -116,27 +116,9 @@ object Analysis {
       val docs = processed.map(elem => Document.parse("{_id: {party: \"" + elem._1 + "\"" + "}, count: " + elem._2 + "}"))
       docs.saveToMongoDB(WriteConfig(Map("uri" -> (sys.env("REAGENT_MONGO") + "examples.countHashtagsUsedByParty?authSource=examples"))))
     }
-  }
+  }*/
 
-  def countByNounsAndParty(rdd: RDD[Document], saveToDB: Boolean = false): Unit = {
-    val processed =
-      rdd
-        .flatMap(tweet => getNouns(getText(tweet)).map(noun => (noun, getParty(tweet))))
-        .groupBy(identity)
-        .mapValues(_.size)
-        .sortBy(-_._2)
-
-    println(processed.take(20).mkString("Wie oft nutzt welche Partei welche Nomen\n", "\n", ""))
-
-    if (saveToDB) {
-      val docs = processed.map(elem => Document.parse("{_id: {party: \"" + elem._1._2 + "\"" +
-        ",noun: \"" + elem._1._1 + "\"" +
-        "}, count: " + elem._2 + "}"))
-      docs.saveToMongoDB(WriteConfig(Map("uri" -> (sys.env("REAGENT_MONGO") + "examples.countByNounsAndParty?authSource=examples"))))
-    }
-  }
-
-  def countBySource(rdd: RDD[Document], saveToDB: Boolean = false): Unit = {
+  def countByURL(rdd: RDD[Document], saveToDB: Boolean = false): Unit = {
     val processed =
       rdd
         .groupBy(getSource)
@@ -177,7 +159,10 @@ object Analysis {
     }
   }
 
-  def avgTweetLengthByTimeAndPartyAndBoth(rdd: RDD[Document], saveToDB: Boolean = false): Unit = {
+  /**
+   * /averageTweets -> [{"CDU": {"2020": 123, ...}}, {"SPD": {"2017": 5, ...}}, ...] -> wie count
+   */
+  def avgTweetLength(rdd: RDD[Document], saveToDB: Boolean = false): Unit = {
     val processed = rdd
       .map(elem => ((getParty(elem), getTime(elem)), getText(elem).length))
       .groupBy(_._1)
@@ -215,6 +200,47 @@ object Analysis {
     }
 
   }
-//Reply_settings
+
+  /**
+   * /averageReply -> [{"CDU": {"2020": 1, ...}}, {"SPD": {"2017": 0.25, ...}}, ...] -> wie count
+   */
+  def avgReplies(rdd: RDD[Document], saveToDB: Boolean = false): Unit = ???
+
+  /**
+   * /mosttweetsday -> [{"CDU": {"Mittwoch": 7642, ...}}, {"SPD": {"Donnerstag": 6234, ...}}, ...] -> wie count
+   */
+  def mostTweetsDay(rdd: RDD[Document], saveToDB: Boolean = false): Unit = ???
+
+  /**
+   * /mosttweetstime -> [{"CDU": {"01": 7642, ...}}, {"SPD": {"17": 6234, ...}}, ...] -> wie count
+   */
+  def mostTweetsTime(rdd: RDD[Document], saveToDB: Boolean = false): Unit = ???
+
+  /**
+   * /averagelikestweet -> [{"CDU": {"2020": 123, ...}}, {"SPD": {"2017": 5, ...}}, ...] -> wie count
+   */
+  def avgLikes(rdd: RDD[Document], saveToDB: Boolean = false): Unit = ???
+
+  /**
+   * /averageanswerstweet -> [{"CDU": {"2020": 123, ...}}, {"SPD": {"2017": 5, ...}}, ...] -> wie count
+   */
+  def avgAnswers(rdd: RDD[Document], saveToDB: Boolean = false): Unit = ???
+
+  /**
+   * /mediausagetweets -> [{"CDU": {"2020": 0.05, ...}}, {"SPD": {"2017": 0.5, ...}}, ...] -> wie count
+   */
+  def mediaUsage(rdd: RDD[Document], saveToDB: Boolean = false): Unit = ???
+
+  /**
+   * /mostTagedUser -> {"2020": {"1": "User1", ... "10": "User10"}, ...}
+   */
+  def mostTaggedUsers(rdd: RDD[Document], saveToDB: Boolean = false): Unit = ???
+
+  /**
+   * /mostActiveUser -> {"2020": {"1": "User1", ... "5": "User5"}, ...}
+   */
+  def mostActiveUsers(rdd: RDD[Document], saveToDB: Boolean = false): Unit = ???
+
+
 
 }

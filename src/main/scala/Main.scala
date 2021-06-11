@@ -78,7 +78,7 @@ object Main {
     val t3 = System.nanoTime()
     println("Elapsed time Filter: " + (t3 - t2) / 1000000000.0 + "s")
 
-    countTotalByHourAndPartyAndBothAndYear(rdd, true)
+    countTotal(rdd)
 
     val t4 = System.nanoTime()
     println("Elapsed time Berechnung1: " + (t4 - t3) / 1000000000.0 + "s")
