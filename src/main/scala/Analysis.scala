@@ -204,7 +204,49 @@ object Analysis {
   /**
    * /averageReply -> [{"CDU": {"2020": 1, ...}}, {"SPD": {"2017": 0.25, ...}}, ...] -> wie count
    */
-  def avgReplies(rdd: RDD[Document], saveToDB: Boolean = false): Unit = ???
+  def avgReplies(rdd: RDD[Document], saveToDB: Boolean = false): Unit = {
+    val processedAll = rdd
+      .groupBy(tweet => (getParty(tweet),getTime(tweet)))
+      .mapValues(tweets => tweets.map(tweet => getRepliesCount(tweet)))
+      .sortBy(elem => (elem._1._1))//nur fuer print
+
+    //println(processedAll.collect().mkString("Array(", ", ", ")")) zu gross
+
+    val processedParty = processedAll.groupBy(x => x._1._1).mapValues(x => x.map(_._2.sum).sum/x.map(_._2.size).sum.toDouble).sortBy(-_._2)
+    println(processedParty.collect().mkString("Durchschnittliche Antwortanzahl pro Partei\n", "\n", ""))
+
+    val processedYearAndParty = processedAll.groupBy(elem => (elem._1._1, elem._1._2._1)).mapValues(x => x.map(_._2.sum).sum/x.map(_._2.size).sum.toDouble).sortBy(-_._2)
+    println(processedYearAndParty.collect().mkString("Durchschnittliche Antwortanzahl pro Jahr pro Partei\n", "\n", ""))
+
+    val processedMonthAndParty = processedAll.groupBy(elem => (elem._1._1, elem._1._2._1, elem._1._2._2)).mapValues(x => x.map(_._2.sum).sum/x.map(_._2.size).sum.toDouble).sortBy(-_._2)
+    println(processedMonthAndParty.collect().mkString("Durchschnittliche Antwortanzahl pro Monat pro Partei\n", "\n", ""))
+
+    val processedWeekAndParty = processedAll.groupBy(elem => (elem._1._1, elem._1._2._1, elem._1._2._4 / 7 + 1)).mapValues(x => x.map(_._2.sum).sum/x.map(_._2.size).sum.toDouble).sortBy(-_._2)
+    println(processedWeekAndParty.collect().mkString("Durchschnittliche Antwortanzahl pro Woche pro Partei\n", "\n", ""))
+
+    if(saveToDB){
+
+      val docsYearAndParty = processedYearAndParty.map(elem => Document.parse("{_id: {party: \"" + elem._1._1 + "\",year: " + elem._1._2 + "},count: " + elem._2 + "}"))
+      docsYearAndParty.saveToMongoDB(WriteConfig(Map("uri" -> (sys.env("REAGENT_MONGO") + "examples.avgRepliesByYear?authSource=examples"))))
+
+      val docsMonthAndParty = processedMonthAndParty.map(elem => Document.parse(
+        "{_id: {" +
+          "party: \"" + elem._1._1 +
+          "\",year: " + elem._1._2 +
+          ",month: " + elem._1._3 +
+          "},count: " + elem._2 + "}"))
+      docsMonthAndParty.saveToMongoDB(WriteConfig(Map("uri" -> (sys.env("REAGENT_MONGO") + "examples.avgRepliesByMonth?authSource=examples"))))
+
+      val docsWeekAndParty = processedWeekAndParty.map(elem => Document.parse(
+        "{_id: {" +
+          "party: \"" + elem._1._1 +
+          "\",year: " + elem._1._2 +
+          ",week: " + elem._1._3 +
+          "},count: " + elem._2 + "}"))
+      docsWeekAndParty.saveToMongoDB(WriteConfig(Map("uri" -> (sys.env("REAGENT_MONGO") + "examples.avgRepliesByWeek?authSource=examples"))))
+
+    }
+  }
 
   /**
    * /mosttweetsday -> [{"CDU": {"Mittwoch": 7642, ...}}, {"SPD": {"Donnerstag": 6234, ...}}, ...] -> wie count
@@ -219,12 +261,49 @@ object Analysis {
   /**
    * /averagelikestweet -> [{"CDU": {"2020": 123, ...}}, {"SPD": {"2017": 5, ...}}, ...] -> wie count
    */
-  def avgLikes(rdd: RDD[Document], saveToDB: Boolean = false): Unit = ???
+  def avgLikes(rdd: RDD[Document], saveToDB: Boolean = false): Unit = {
+    val processedAll = rdd
+      .groupBy(tweet => (getParty(tweet),getTime(tweet)))
+      .mapValues(tweets => tweets.map(tweet => getLikesCount(tweet)))
+      .sortBy(elem => (elem._1._1))//nur fuer print
 
-  /**
-   * /averageanswerstweet -> [{"CDU": {"2020": 123, ...}}, {"SPD": {"2017": 5, ...}}, ...] -> wie count
-   */
-  def avgAnswers(rdd: RDD[Document], saveToDB: Boolean = false): Unit = ???
+    //println(processedAll.collect().mkString("Array(", ", ", ")")) zu gross
+
+    val processedParty = processedAll.groupBy(x => x._1._1).mapValues(x => x.map(_._2.sum).sum/x.map(_._2.size).sum.toDouble).sortBy(-_._2)
+    println(processedParty.collect().mkString("Durchschnittliche Likeanzahl pro Partei\n", "\n", ""))
+
+    val processedYearAndParty = processedAll.groupBy(elem => (elem._1._1, elem._1._2._1)).mapValues(x => x.map(_._2.sum).sum/x.map(_._2.size).sum.toDouble).sortBy(-_._2)
+    println(processedYearAndParty.collect().mkString("Durchschnittliche Likeanzahl pro Jahr pro Partei\n", "\n", ""))
+
+    val processedMonthAndParty = processedAll.groupBy(elem => (elem._1._1, elem._1._2._1, elem._1._2._2)).mapValues(x => x.map(_._2.sum).sum/x.map(_._2.size).sum.toDouble).sortBy(-_._2)
+    println(processedMonthAndParty.collect().mkString("Durchschnittliche Likeanzahl pro Monat pro Partei\n", "\n", ""))
+
+    val processedWeekAndParty = processedAll.groupBy(elem => (elem._1._1, elem._1._2._1, elem._1._2._4 / 7 + 1)).mapValues(x => x.map(_._2.sum).sum/x.map(_._2.size).sum.toDouble).sortBy(-_._2)
+    println(processedWeekAndParty.collect().mkString("Durchschnittliche Likeanzahl pro Woche pro Partei\n", "\n", ""))
+
+    if(saveToDB){
+
+      val docsYearAndParty = processedYearAndParty.map(elem => Document.parse("{_id: {party: \"" + elem._1._1 + "\",year: " + elem._1._2 + "},count: " + elem._2 + "}"))
+      docsYearAndParty.saveToMongoDB(WriteConfig(Map("uri" -> (sys.env("REAGENT_MONGO") + "examples.avgLikesByYear?authSource=examples"))))
+
+      val docsMonthAndParty = processedMonthAndParty.map(elem => Document.parse(
+        "{_id: {" +
+          "party: \"" + elem._1._1 +
+          "\",year: " + elem._1._2 +
+          ",month: " + elem._1._3 +
+          "},count: " + elem._2 + "}"))
+      docsMonthAndParty.saveToMongoDB(WriteConfig(Map("uri" -> (sys.env("REAGENT_MONGO") + "examples.avgLikesByMonth?authSource=examples"))))
+
+      val docsWeekAndParty = processedWeekAndParty.map(elem => Document.parse(
+        "{_id: {" +
+          "party: \"" + elem._1._1 +
+          "\",year: " + elem._1._2 +
+          ",week: " + elem._1._3 +
+          "},count: " + elem._2 + "}"))
+      docsWeekAndParty.saveToMongoDB(WriteConfig(Map("uri" -> (sys.env("REAGENT_MONGO") + "examples.avgLikesByWeek?authSource=examples"))))
+
+    }
+  }
 
   /**
    * /mediausagetweets -> [{"CDU": {"2020": 0.05, ...}}, {"SPD": {"2017": 0.5, ...}}, ...] -> wie count

@@ -59,10 +59,22 @@ object Utilities {
       .get("hashtags").asInstanceOf[util.ArrayList[String]].asScala.toList
   }
 
-  def getTime(document: Document): (Int, Int, Int, Int, Int) = {
+  def getTime(document: Document): (Int, Int, Int, Int, Int, String) = {
     val timeStamp = getTimestamp(document);
-    (timeStamp.getYear, timeStamp.getMonth.getValue, timeStamp.getDayOfMonth,timeStamp.getDayOfYear, timeStamp.getHour)
+    (timeStamp.getYear, timeStamp.getMonth.getValue, timeStamp.getDayOfMonth,timeStamp.getDayOfYear, timeStamp.getHour, timeStamp.getDayOfWeek.name())
   }
+
+  def getRepliesCount(document: Document): Int = document.getInteger("replies_count")
+
+  def getLikesCount(document: Document): Int = document.getInteger("likes_count")
+
+  // Tims Block //////////////////////////////
+
+  //End Block////////////////////////////////
+
+  // Saschas Block //////////////////////////
+
+  //End Block /////////////////////////////
 
   def saveTweetsFromThisPeriod(rdd: RDD[Document]): Unit = {
     val after2017 = rdd

@@ -1,7 +1,6 @@
-import Analysis._
-import Utilities._
+import Analysis.{avgLikes, avgReplies}
 import com.mongodb.spark.{MongoSpark, toDocumentRDDFunctions}
-import org.apache.spark.sql.{Row, SparkSession}
+import org.apache.spark.sql.SparkSession
 
 import java.time.LocalDateTime
 
@@ -78,7 +77,10 @@ object Main {
     val t3 = System.nanoTime()
     println("Elapsed time Filter: " + (t3 - t2) / 1000000000.0 + "s")
 
-    countTotal(rdd)
+    //countTotal(rdd)
+
+    avgReplies(rdd, true)
+    avgLikes(rdd, true)
 
     val t4 = System.nanoTime()
     println("Elapsed time Berechnung1: " + (t4 - t3) / 1000000000.0 + "s")
