@@ -1,4 +1,4 @@
-import Analysis.{avgLikes, avgReplies}
+import Analysis.mostTweetsDay
 import com.mongodb.spark.{MongoSpark, toDocumentRDDFunctions}
 import org.apache.spark.sql.SparkSession
 
@@ -79,8 +79,7 @@ object Main {
 
     //countTotal(rdd)
 
-    avgReplies(rdd, true)
-    avgLikes(rdd, true)
+    mostTweetsDay(rdd)
 
     val t4 = System.nanoTime()
     println("Elapsed time Berechnung1: " + (t4 - t3) / 1000000000.0 + "s")

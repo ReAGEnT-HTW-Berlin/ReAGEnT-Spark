@@ -251,12 +251,123 @@ object Analysis {
   /**
    * /mosttweetsday -> [{"CDU": {"Mittwoch": 7642, ...}}, {"SPD": {"Donnerstag": 6234, ...}}, ...] -> wie count
    */
-  def mostTweetsDay(rdd: RDD[Document], saveToDB: Boolean = false): Unit = ???
+  def mostTweetsDay(rdd: RDD[Document], saveToDB: Boolean = false): Unit = {
+    val processedAll = rdd
+      .groupBy(tweet => (getParty(tweet), getTime(tweet)))
+      .mapValues(_.size)
+      .sortBy(elem => (elem._1._2, -elem._2))
+    println(processedAll.collect().mkString("Wie viele Tweets pro Partei pro Stunde\n", "\n", ""))
+
+    val processedParty = processedAll
+      .groupBy(elem => (elem._1._1,elem._1._2._6))
+      .mapValues(_.map(_._2).sum)
+    println(processedParty.collect().mkString("Meisten Tweets an einen Wochentag pro Partei\n", "\n", ""))
+
+    val processedYearAndParty = processedAll
+      .groupBy(elem => (elem._1._1, elem._1._2._1, elem._1._2._6))
+      .mapValues(_.map(_._2).sum)
+    println(processedYearAndParty.collect().mkString("Meisten Tweets an einen Wochentag pro Jahr pro Partei\n", "\n", ""))
+
+    val processedMonthAndParty = processedAll
+      .groupBy(elem => (elem._1._1,elem._1._2._1, elem._1._2._2,elem._1._2._6))
+      .mapValues(_.map(_._2).sum)
+    println(processedMonthAndParty.collect().mkString("Meisten Tweets an einen Wochentag pro Monat pro Partei\n", "\n", ""))
+
+    val processedWeekAndParty = processedAll
+      .groupBy(elem => (elem._1._1,elem._1._2._1, elem._1._2._4 / 7 + 1,elem._1._2._6))
+      .mapValues(_.map(_._2).sum)
+    println(processedWeekAndParty.collect().mkString("Meisten Tweets an einen Wochentag pro Woche pro Partei\n", "\n", ""))
+
+    if(saveToDB){
+
+      val docsYearAndParty = processedYearAndParty.map(elem => Document.parse(
+        "{_id: " +
+          "{party: \"" + elem._1._1 +
+          "\",year: " + elem._1._2 +
+          ",weekday: \"" + elem._1._3 +
+          "\"},count: " + elem._2 + "}"))
+      docsYearAndParty.saveToMongoDB(WriteConfig(Map("uri" -> (sys.env("REAGENT_MONGO") + "examples.mostTweetsDayByYear?authSource=examples"))))
+
+      val docsMonthAndParty = processedMonthAndParty.map(elem => Document.parse(
+        "{_id: {" +
+          "party: \"" + elem._1._1 +
+          "\",year: " + elem._1._2 +
+          ",month: " + elem._1._3 +
+          ",weekday: \"" + elem._1._4 +
+          "\"},count: " + elem._2 + "}"))
+      docsMonthAndParty.saveToMongoDB(WriteConfig(Map("uri" -> (sys.env("REAGENT_MONGO") + "examples.mostTweetsDayByMonth?authSource=examples"))))
+
+      val docsWeekAndParty = processedWeekAndParty.map(elem => Document.parse(
+        "{_id: {" +
+          "party: \"" + elem._1._1 +
+          "\",year: " + elem._1._2 +
+          ",week: " + elem._1._3 +
+          ",weekday: \"" + elem._1._4 +
+          "\"},count: " + elem._2 + "}"))
+      docsWeekAndParty.saveToMongoDB(WriteConfig(Map("uri" -> (sys.env("REAGENT_MONGO") + "examples.mostTweetsDayByWeek?authSource=examples"))))
+
+    }
+  }
 
   /**
    * /mosttweetstime -> [{"CDU": {"01": 7642, ...}}, {"SPD": {"17": 6234, ...}}, ...] -> wie count
    */
-  def mostTweetsTime(rdd: RDD[Document], saveToDB: Boolean = false): Unit = ???
+  def mostTweetsTime(rdd: RDD[Document], saveToDB: Boolean = false): Unit = {
+    val processedAll = rdd
+      .groupBy(tweet => (getParty(tweet), getTime(tweet)))
+      .mapValues(_.size)
+      .sortBy(elem => (elem._1._2, -elem._2))
+    println(processedAll.collect().mkString("Wie viele Tweets pro Partei pro Stunde\n", "\n", ""))
+
+    val processedParty = processedAll
+      .groupBy(elem => (elem._1._1,elem._1._2._5))
+      .mapValues(_.map(_._2).sum)
+    println(processedParty.collect().mkString("Meisten Tweets zu einer Tageszeit pro Partei\n", "\n", ""))
+
+    val processedYearAndParty = processedAll
+      .groupBy(elem => (elem._1._1, elem._1._2._1, elem._1._2._5))
+      .mapValues(_.map(_._2).sum)
+    println(processedYearAndParty.collect().mkString("Meisten Tweets zu einer Tageszeit pro Jahr pro Partei\n", "\n", ""))
+
+    val processedMonthAndParty = processedAll
+      .groupBy(elem => (elem._1._1,elem._1._2._1, elem._1._2._2,elem._1._2._5))
+      .mapValues(_.map(_._2).sum)
+    println(processedMonthAndParty.collect().mkString("Meisten Tweets zu einer Tageszeit pro Monat pro Partei\n", "\n", ""))
+
+    val processedWeekAndParty = processedAll
+      .groupBy(elem => (elem._1._1,elem._1._2._1, elem._1._2._4 / 7 + 1,elem._1._2._5))
+      .mapValues(_.map(_._2).sum)
+    println(processedWeekAndParty.collect().mkString("Meisten Tweets zu einer Tageszeit pro Woche pro Partei\n", "\n", ""))
+
+    if(saveToDB){
+
+      val docsYearAndParty = processedYearAndParty.map(elem => Document.parse(
+        "{_id: " +
+          "{party: \"" + elem._1._1 +
+          "\",year: " + elem._1._2 +
+          ",hour: " + elem._1._3 +
+          "},count: " + elem._2 + "}"))
+      docsYearAndParty.saveToMongoDB(WriteConfig(Map("uri" -> (sys.env("REAGENT_MONGO") + "examples.mostTweetsTimeByYear?authSource=examples"))))
+
+      val docsMonthAndParty = processedMonthAndParty.map(elem => Document.parse(
+        "{_id: {" +
+          "party: \"" + elem._1._1 +
+          "\",year: " + elem._1._2 +
+          ",month: " + elem._1._3 +
+          ",hour: " + elem._1._4 +
+          "},count: " + elem._2 + "}"))
+      docsMonthAndParty.saveToMongoDB(WriteConfig(Map("uri" -> (sys.env("REAGENT_MONGO") + "examples.mostTweetsTimeByMonth?authSource=examples"))))
+
+      val docsWeekAndParty = processedWeekAndParty.map(elem => Document.parse(
+        "{_id: {" +
+          "party: \"" + elem._1._1 +
+          "\",year: " + elem._1._2 +
+          ",week: " + elem._1._3 +
+          ",hour: " + elem._1._4 +
+          "},count: " + elem._2 + "}"))
+      docsWeekAndParty.saveToMongoDB(WriteConfig(Map("uri" -> (sys.env("REAGENT_MONGO") + "examples.mostTweetsTimeByWeek?authSource=examples"))))
+    }
+  }
 
   /**
    * /averagelikestweet -> [{"CDU": {"2020": 123, ...}}, {"SPD": {"2017": 5, ...}}, ...] -> wie count
@@ -301,7 +412,6 @@ object Analysis {
           ",week: " + elem._1._3 +
           "},count: " + elem._2 + "}"))
       docsWeekAndParty.saveToMongoDB(WriteConfig(Map("uri" -> (sys.env("REAGENT_MONGO") + "examples.avgLikesByWeek?authSource=examples"))))
-
     }
   }
 
