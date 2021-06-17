@@ -70,6 +70,10 @@ object Utilities {
 
   // Tims Block //////////////////////////////
 
+  def getMediaCount(document: Document): Int = document.getInteger("video")+document.get("photos").asInstanceOf[util.ArrayList[String]].size()
+
+  def getUser(document:Document): String = document.getString("username")
+
   //End Block////////////////////////////////
 
   // Saschas Block //////////////////////////
