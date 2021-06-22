@@ -82,7 +82,7 @@ object Utilities {
   //End Block////////////////////////////////
 
   // Saschas Block //////////////////////////
-
+  def getRetweetsCount(document:Document): Int = document.getInteger("retweets_count")
   //End Block /////////////////////////////
 
   def saveTweetsFromThisPeriod(rdd: RDD[Document]): Unit = {
