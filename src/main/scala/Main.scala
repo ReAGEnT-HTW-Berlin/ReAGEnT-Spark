@@ -1,4 +1,4 @@
-import Analysis.{countByHashtag, mediaUsage, mostActiveUsers, mostTweetsDay}
+import Analysis.{countByHashtag, mediaUsage, mostActiveUsers, mostTaggedUsers, mostTweetsDay}
 import com.mongodb.spark.{MongoSpark, toDocumentRDDFunctions}
 import org.apache.spark.sql.SparkSession
 
@@ -15,6 +15,7 @@ object Main {
       .appName("MongoSparkConnectorIntro")
       //      .config("spark.mongodb.input.uri", sys.env("REAGENT_MONGO") + "examples.bson-gaertner?authSource=examples")
       .config("spark.mongodb.input.uri", sys.env("REAGENT_MONGO") + "examples.tweets_bundestag_legislatur?authSource=examples")
+      //.config("spark.mongodb.input.uri", sys.env("REAGENT_MONGO") + "examples.TestCollection?authSource=examples")
       .config("spark.testing.memory", 2147480000)
       .getOrCreate()
 
@@ -82,7 +83,8 @@ object Main {
     //mostTweetsDay(rdd)
     //mediaUsage(rdd)
     //mostActiveUsers(rdd,true)
-    countByHashtag(rdd,true)
+    //countByHashtag(rdd,true)
+    mostTaggedUsers(rdd,true)
 
     val t4 = System.nanoTime()
     println("Elapsed time Berechnung1: " + (t4 - t3) / 1000000000.0 + "s")

@@ -505,7 +505,75 @@ object Analysis {
   /**
    * /mostTagedUser -> {"2020": {"1": "User1", ... "10": "User10"}, ...}
    */
-  def mostTaggedUsers(rdd: RDD[Document], saveToDB: Boolean = false): Unit = ???
+  def mostTaggedUsers(rdd: RDD[Document], saveToDB: Boolean = false): Unit = {
+    val processedAll = rdd
+      .flatMap(tweet => getTaggedUserList(tweet).map(user => (getParty(tweet),getTime(tweet),user)))
+      .groupBy(identity)
+      .mapValues(_.size)
+      .sortBy(-_._2)
+
+    val minTaggs = 2 ;
+
+    val processedParty = processedAll.groupBy(x => (x._1._1,x._1._3)).mapValues(x => x.map(_._2).sum).sortBy(-_._2).filter(_._2>minTaggs)
+    println(processedParty.collect().take(25).mkString("Meistgetaggte User  pro Partei\n", "\n", ""))
+
+    val processedHour = processedAll.groupBy(x=> (x._1._2,x._1._3)).mapValues(x => x.map(_._2).sum).sortBy(-_._2).filter(_._2>minTaggs)
+    println(processedHour.collect().take(25).mkString("Meistgetaggte User pro Stunde\n", "\n", ""))
+
+    val processedYearAndParty = processedAll.groupBy(elem => (elem._1._1, elem._1._2._1,elem._1._3)).mapValues(x => x.map(_._2).sum).sortBy(-_._2).filter(_._2>minTaggs)
+    println(processedYearAndParty.collect().take(25).mkString("Meistgetaggte User pro Jahr pro Partei\n", "\n", ""))
+
+    val processedMonthAndParty = processedAll.groupBy(elem => (elem._1._1, elem._1._2._1, elem._1._2._2,elem._1._3)).mapValues(x => x.map(_._2).sum).sortBy(-_._2).filter(_._2>minTaggs)
+    println(processedMonthAndParty.collect().take(25).mkString("Meistgetaggte User pro Monat pro Partei\n", "\n", ""))
+
+    val processedWeekAndParty = processedAll.groupBy(elem => (elem._1._1, elem._1._2._1, elem._1._2._4 / 7 + 1,elem._1._3)).mapValues(x => x.map(_._2).sum).sortBy(-_._2).filter(_._2>minTaggs)
+    println(processedWeekAndParty.collect().take(25).mkString("Meistgetaggte User pro Woche pro Partei\n", "\n", ""))
+
+    if(saveToDB){
+      /*val docsAll = processedAll.map(elem => Document.parse("{_id: {party: \"" + elem._1._1 + "\"" +
+        ",year: " + elem._1._2._1 +
+        ",month: " + elem._1._2._2 +
+        ",day: " + elem._1._2._3 +
+        ",hour: " + elem._1._2._5 +
+        ",taggedUser: \""+elem._1._3 +
+        "\"}," +
+        "count: " + elem._2 + "}"))
+      docsAll.saveToMongoDB(WriteConfig(Map("uri" -> (sys.env("REAGENT_MONGO") + "examples.mostTaggedUserssByHourAndParty?authSource=examples"))))*/
+
+      /* val docsParty = processedParty.map(elem => Document.parse("{_id: {party: \"" + elem._1._1 + "\", taggedUser: \""+ elem._1._2 +"\" },count: " + elem._2 + "}"))
+       docsParty.saveToMongoDB(WriteConfig(Map("uri" -> (sys.env("REAGENT_MONGO") + "examples.mostTaggedUsersByParty?authSource=examples"))))
+
+       val docsHour = processedHour.map(elem => Document.parse("{_id: {" +
+         ",year: " + elem._1._1._1 +
+         ",month: " + elem._1._1._2 +
+         ",day: " + elem._1._1._3 +
+         ",hour: " + elem._1._1._5 +
+         ",taggedUser: \""+elem._1._2 +
+         "\"},count: " + elem._2 + "}"))
+       docsHour.saveToMongoDB(WriteConfig(Map("uri" -> (sys.env("REAGENT_MONGO") + "examples.mostTaggedUsersByHour?authSource=examples"))))*/
+
+      val docsYearAndParty = processedYearAndParty.map(elem => Document.parse("{_id: {party: \"" + elem._1._1 + "\",year: " + elem._1._2 + ",taggedUser: \""+ elem._1._3 +"\" },count: " + elem._2.asInstanceOf[Double]+ "}"))
+      docsYearAndParty.saveToMongoDB(WriteConfig(Map("uri" -> (sys.env("REAGENT_MONGO") + "examples.mostTaggedUsersByYear?authSource=examples"))))
+
+      val docsMonthAndParty = processedMonthAndParty.map(elem => Document.parse(
+        "{_id: {" +
+          "party: \"" + elem._1._1 +
+          "\",year: " + elem._1._2 +
+          ",month: " + elem._1._3 +
+          ",taggedUser: \""+elem._1._4 +
+          "\"},count: " + elem._2 + "}"))
+      docsMonthAndParty.saveToMongoDB(WriteConfig(Map("uri" -> (sys.env("REAGENT_MONGO") + "examples.mostTaggedUsersByMonth?authSource=examples"))))
+
+      val docsWeekAndParty = processedWeekAndParty.map(elem => Document.parse(
+        "{_id: {" +
+          "party: \"" + elem._1._1 +
+          "\",year: " + elem._1._2 +
+          ",week: " + elem._1._3 +
+          ",taggedUser: \""+elem._1._4 +
+          "\"},count: " + elem._2 + "}"))
+      docsWeekAndParty.saveToMongoDB(WriteConfig(Map("uri" -> (sys.env("REAGENT_MONGO") + "examples.mostTaggedUsersByWeek?authSource=examples"))))
+    }
+  }
 
   /**
    * /mostActiveUser -> {"2020": {"1": "User1", ... "5": "User5"}, ...}

@@ -74,6 +74,11 @@ object Utilities {
 
   def getUser(document:Document): String = document.getString("username")
 
+  def getTaggedUserList(document: Document):List[String] = {
+    document.get("mentions").asInstanceOf[util.ArrayList[Document]].asScala
+      .map(_.getString("screen_name")).toList
+  }
+
   //End Block////////////////////////////////
 
   // Saschas Block //////////////////////////
