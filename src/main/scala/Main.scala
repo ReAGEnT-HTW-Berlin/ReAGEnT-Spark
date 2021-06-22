@@ -1,4 +1,4 @@
-import Analysis.{countByHashtag, mediaUsage, mostActiveUsers, mostTaggedUsers, mostTweetsDay}
+import Analysis.{countByHashtag, mediaUsage, mostActiveUsers, mostTaggedUsers, mostTweetsDay, totalReplies}
 import com.mongodb.spark.{MongoSpark, toDocumentRDDFunctions}
 import org.apache.spark.sql.SparkSession
 
@@ -84,7 +84,8 @@ object Main {
     //mediaUsage(rdd)
     //mostActiveUsers(rdd,true)
     //countByHashtag(rdd,true)
-    mostTaggedUsers(rdd,true)
+    //mostTaggedUsers(rdd,true)
+    totalReplies(rdd,true)
 
     val t4 = System.nanoTime()
     println("Elapsed time Berechnung1: " + (t4 - t3) / 1000000000.0 + "s")
