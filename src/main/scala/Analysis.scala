@@ -762,13 +762,15 @@ object Analysis {
         .mapValues(_.size)
         .sortBy(-_._2)
 
-    val processedYearAndParty = processedAll.groupBy(elem => (elem._1._1, elem._1._2._1, elem._1._3)).mapValues(x => x.map(_._2).sum).sortBy(-_._2)
+    val minUrls = 1;
+
+    val processedYearAndParty = processedAll.groupBy(elem => (elem._1._1, elem._1._2._1, elem._1._3)).mapValues(x => x.map(_._2).sum).sortBy(-_._2).filter(_._2 > minUrls)
     println(processedYearAndParty.collect().take(25).mkString("Anzahl Urls pro Jahr pro Partei\n", "\n", ""))
 
-    val processedMonthAndParty = processedAll.groupBy(elem => (elem._1._1, elem._1._2._1, elem._1._2._2, elem._1._3)).mapValues(x => x.map(_._2).sum).sortBy(-_._2)
+    val processedMonthAndParty = processedAll.groupBy(elem => (elem._1._1, elem._1._2._1, elem._1._2._2, elem._1._3)).mapValues(x => x.map(_._2).sum).sortBy(-_._2).filter(_._2 > minUrls)
     println(processedMonthAndParty.collect().take(25).mkString("Anzahl Urls pro Monat pro Partei\n", "\n", ""))
 
-    val processedWeekAndParty = processedAll.groupBy(elem => (elem._1._1, elem._1._2._1, elem._1._2._4 / 7 + 1, elem._1._3)).mapValues(x => x.map(_._2).sum).sortBy(-_._2)
+    val processedWeekAndParty = processedAll.groupBy(elem => (elem._1._1, elem._1._2._1, elem._1._2._4 / 7 + 1, elem._1._3)).mapValues(x => x.map(_._2).sum).sortBy(-_._2).filter(_._2 > minUrls)
     println(processedWeekAndParty.collect().take(25).mkString("Anzahl Urls pro Woche pro Partei\n", "\n", ""))
 
     if (saveToDB) {
