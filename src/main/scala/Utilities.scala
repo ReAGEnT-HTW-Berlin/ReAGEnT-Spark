@@ -83,6 +83,15 @@ object Utilities {
 
   // Saschas Block //////////////////////////
   def getRetweetsCount(document:Document): Int = document.getInteger("retweets_count")
+
+  def getUrls(document:Document): List[String] = {
+    document
+      .get("urls")
+      .asInstanceOf[util.ArrayList[String]]
+      .asScala
+      .map(url => url.split("//")(1).split("/")(0))
+      .toList
+  }
   //End Block /////////////////////////////
 
   def saveTweetsFromThisPeriod(rdd: RDD[Document]): Unit = {

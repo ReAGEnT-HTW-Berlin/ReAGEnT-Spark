@@ -186,42 +186,45 @@ object Analysis {
    * /averageTweets -> [{"CDU": {"2020": 123, ...}}, {"SPD": {"2017": 5, ...}}, ...] -> wie count
    */
   def avgTweetLength(rdd: RDD[Document], saveToDB: Boolean = false): Unit = {
-    val processed = rdd
+    val processedAll = rdd
       .map(elem => ((getParty(elem), getTime(elem)), getText(elem).length))
       .groupBy(_._1)
       .map(elem => (elem._1, (elem._2.reduce((A, B) => (A._1, A._2 + B._2)))._2 / elem._2.size))
 
-    println(processed.collect().mkString("Durchschnittslänge der Tweets nach Zeit und Partei \n", "\n", ""))
+    //println(processed.collect().mkString("Durchschnittslänge der Tweets nach Zeit und Partei \n", "\n", ""))
 
-    val processedByParty = processed.groupBy(_._1._1).mapValues(x => x.map(_._2).sum / x.size)
-
+    val processedByParty = processedAll.groupBy(_._1._1).mapValues(x => x.map(_._2).sum / x.size).sortBy(-_._2)
     println(processedByParty.collect().mkString("Durchschnittslänge der Tweets nach Partei \n", "\n", ""))
 
-    val processedByTime = processed.groupBy(_._1._2).mapValues(x => x.map(_._2).sum / x.size)
+    val processedYearAndParty = processedAll.groupBy(elem => (elem._1._1, elem._1._2._1)).mapValues(x => x.map(_._2).sum / x.size).sortBy(-_._2)
+    println(processedYearAndParty.collect().mkString("Durchschnittslänge der Tweets pro Jahr pro Partei\n", "\n", ""))
 
-    println(processedByTime.collect().mkString("Durchschnittslänge der Tweets nach Zeit \n", "\n", ""))
+    val processedMonthAndParty = processedAll.groupBy(elem => (elem._1._1, elem._1._2._1, elem._1._2._2)).mapValues(x => x.map(_._2).sum / x.size).sortBy(-_._2)
+    println(processedMonthAndParty.collect().mkString("Durchschnittslänge der Tweets pro Monat pro Partei\n", "\n", ""))
+
+    val processedWeekAndParty = processedAll.groupBy(elem => (elem._1._1, elem._1._2._1, elem._1._2._4 / 7 + 1)).mapValues(x => x.map(_._2).sum / x.size).sortBy(-_._2)
+    println(processedWeekAndParty.collect().mkString("Durchschnittslänge der Tweets pro Woche pro Partei\n", "\n", ""))
 
     if (saveToDB) {
-      val processedDocs = processed.map(elem => Document.parse("{_id: {party: \"" + elem._1._1 + "\"" +
-        ",year: " + elem._1._2._1 +
-        ",month: " + elem._1._2._2 +
-        ",day: " + elem._1._2._3 +
-        ",hour: " + elem._1._2._4 + "},length: " + elem._2 + "}"))
-      processedDocs.saveToMongoDB(WriteConfig(Map("uri" -> (sys.env("REAGENT_MONGO") + "examples.avgTweetLengthByTimeAndParty?authSource=examples"))))
+      val docsYearAndParty = processedYearAndParty.map(elem => Document.parse("{_id: {party: \"" + elem._1._1 + "\",year: " + elem._1._2 + "},count: " + elem._2 + "}"))
+      docsYearAndParty.saveToMongoDB(WriteConfig(Map("uri" -> (sys.env("REAGENT_MONGO") + "examples.avgTweetLengthByYear?authSource=examples"))))
 
-      val processedByPartyDocs = processedByParty.map(elem => Document.parse("{_id: {party: \"" + elem._1 + "\"" +
-        "},length: \"" + elem._2 + "\"" +
-        "}"))
-      processedByPartyDocs.saveToMongoDB(WriteConfig(Map("uri" -> (sys.env("REAGENT_MONGO") + "examples.avgTweetLengthByParty?authSource=examples"))))
+      val docsMonthAndParty = processedMonthAndParty.map(elem => Document.parse(
+        "{_id: {" +
+          "party: \"" + elem._1._1 +
+          "\",year: " + elem._1._2 +
+          ",month: " + elem._1._3 +
+          "},count: " + elem._2 + "}"))
+      docsMonthAndParty.saveToMongoDB(WriteConfig(Map("uri" -> (sys.env("REAGENT_MONGO") + "examples.avgTweetLengthByMonth?authSource=examples"))))
 
-      val processedByTimeDocs = processedByTime.map(elem => Document.parse("{_id: {" +
-        "year: " + elem._1._1 +
-        ",month: " + elem._1._2 +
-        ",day: " + elem._1._3 +
-        ",hour: " + elem._1._4 + "},length: " + elem._2 + "}"))
-      processedByTimeDocs.saveToMongoDB(WriteConfig(Map("uri" -> (sys.env("REAGENT_MONGO") + "examples.avgTweetLengthByTime?authSource=examples"))))
+      val docsWeekAndParty = processedWeekAndParty.map(elem => Document.parse(
+        "{_id: {" +
+          "party: \"" + elem._1._1 +
+          "\",year: " + elem._1._2 +
+          ",week: " + elem._1._3 +
+          "},count: " + elem._2 + "}"))
+      docsWeekAndParty.saveToMongoDB(WriteConfig(Map("uri" -> (sys.env("REAGENT_MONGO") + "examples.avgTweetLengthByWeek?authSource=examples"))))
     }
-
   }
 
   /**
@@ -751,4 +754,46 @@ object Analysis {
       docsWeekAndParty.saveToMongoDB(WriteConfig(Map("uri" -> (sys.env("REAGENT_MONGO") + "examples.avgRetweetsByWeek?authSource=examples"))))
     }
   }
+
+  def countUrls(rdd: RDD[Document], saveToDB: Boolean = false):Unit = {
+    val processedAll =
+      rdd.flatMap(tweet => getUrls(tweet).map(url => (getParty(tweet), getTime(tweet), url)))
+        .groupBy(identity)
+        .mapValues(_.size)
+        .sortBy(-_._2)
+
+    val processedYearAndParty = processedAll.groupBy(elem => (elem._1._1, elem._1._2._1, elem._1._3)).mapValues(x => x.map(_._2).sum).sortBy(-_._2)
+    println(processedYearAndParty.collect().take(25).mkString("Anzahl Urls pro Jahr pro Partei\n", "\n", ""))
+
+    val processedMonthAndParty = processedAll.groupBy(elem => (elem._1._1, elem._1._2._1, elem._1._2._2, elem._1._3)).mapValues(x => x.map(_._2).sum).sortBy(-_._2)
+    println(processedMonthAndParty.collect().take(25).mkString("Anzahl Urls pro Monat pro Partei\n", "\n", ""))
+
+    val processedWeekAndParty = processedAll.groupBy(elem => (elem._1._1, elem._1._2._1, elem._1._2._4 / 7 + 1, elem._1._3)).mapValues(x => x.map(_._2).sum).sortBy(-_._2)
+    println(processedWeekAndParty.collect().take(25).mkString("Anzahl Urls pro Woche pro Partei\n", "\n", ""))
+
+    if (saveToDB) {
+      val docsYearAndParty = processedYearAndParty.map(elem => Document.parse("{_id: {party: \"" + elem._1._1 + "\",year: " + elem._1._2 + ", url: \"" + elem._1._3 + "\" },count: " + elem._2.asInstanceOf[Double] + "}"))
+      docsYearAndParty.saveToMongoDB(WriteConfig(Map("uri" -> (sys.env("REAGENT_MONGO") + "examples.urlsByYear?authSource=examples"))))
+
+      val docsMonthAndParty = processedMonthAndParty.map(elem => Document.parse(
+        "{_id: {" +
+          "party: \"" + elem._1._1 +
+          "\",year: " + elem._1._2 +
+          ",month: " + elem._1._3 +
+          ",url: \"" + elem._1._4 +
+          "\"},count: " + elem._2 + "}"))
+      docsMonthAndParty.saveToMongoDB(WriteConfig(Map("uri" -> (sys.env("REAGENT_MONGO") + "examples.urlsByMonth?authSource=examples"))))
+
+      val docsWeekAndParty = processedWeekAndParty.map(elem => Document.parse(
+        "{_id: {" +
+          "party: \"" + elem._1._1 +
+          "\",year: " + elem._1._2 +
+          ",week: " + elem._1._3 +
+          ",url: \"" + elem._1._4 +
+          "\"},count: " + elem._2 + "}"))
+      docsWeekAndParty.saveToMongoDB(WriteConfig(Map("uri" -> (sys.env("REAGENT_MONGO") + "examples.urlsByWeek?authSource=examples"))))
+    }
+
+  }
+
 }
