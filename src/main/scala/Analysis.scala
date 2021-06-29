@@ -77,7 +77,7 @@ object Analysis {
         .mapValues(_.size)
         .sortBy(-_._2)
 
-    val minTweets = 10;
+    val minTweets = 10
 
     val processedParty = processedAll.groupBy(x => (x._1._1, x._1._3)).mapValues(x => x.map(_._2).sum).sortBy(-_._2).filter(_._2 > minTweets)
     println(processedParty.collect().take(25).mkString("Anzahl Hastags  pro Partei\n", "\n", ""))
@@ -139,47 +139,6 @@ object Analysis {
       docsWeekAndParty.saveToMongoDB(WriteConfig(Map("uri" -> (sys.env("REAGENT_MONGO") + "examples.hashtagsByWeek?authSource=examples"))))
     }
 
-  }
-
-  def countByURL(rdd: RDD[Document], saveToDB: Boolean = false): Unit = {
-    val processed =
-      rdd
-        .groupBy(getSource)
-        .mapValues(_.size)
-        .sortBy(-_._2)
-
-    println(processed.collect().mkString("Von wo werden wie viele Tweets gepostet\n", "\n", ""))
-
-    if (saveToDB) {
-      val docs = processed.map(elem => Document.parse("{_id: {source: \"" + elem._1 + "\"" + "}, count: " + elem._2 + "}"))
-      docs.saveToMongoDB(WriteConfig(Map("uri" -> (sys.env("REAGENT_MONGO") + "examples.countBySource?authSource=examples"))))
-    }
-  }
-
-  def countConnectedHashtags(rdd: RDD[Document], saveToDB: Boolean = false): Unit = {
-    val processed =
-      rdd
-        .flatMap(tweet => {
-          val hashtags = getHashtags(tweet)
-          if (hashtags.size < 2) {
-            List()
-          } else {
-            (for (i <- 0 until hashtags.size - 1) yield for (j <- i + 1 until hashtags.size) yield (hashtags(i), hashtags(j))).flatten
-          }
-        })
-        .filter(tuple => tuple._1 != tuple._2)
-        .groupBy(tuple => if (tuple._1 < tuple._2) tuple else tuple.swap)
-        .mapValues(_.size)
-        .sortBy(-_._2)
-
-    println(processed.take(20).mkString("Wie oft werden welche Hashtags zusammen gepostet\n", "\n", ""))
-
-    if (saveToDB) {
-      val docs = processed.map(elem => Document.parse("{_id: {hashtag1: \"" + elem._1._1 + "\"" +
-        ",hashtag2: \"" + elem._1._2 + "\"" +
-        "}, count: " + elem._2 + "}"))
-      docs.saveToMongoDB(WriteConfig(Map("uri" -> (sys.env("REAGENT_MONGO") + "examples.countConnectedHashtags?authSource=examples"))))
-    }
   }
 
   /**
@@ -515,7 +474,7 @@ object Analysis {
       .mapValues(_.size)
       .sortBy(-_._2)
 
-    val minTaggs = 2;
+    val minTaggs = 2
 
     val processedParty = processedAll.groupBy(x => (x._1._1, x._1._3)).mapValues(x => x.map(_._2).sum).sortBy(-_._2).filter(_._2 > minTaggs)
     println(processedParty.collect().take(25).mkString("Meistgetaggte User  pro Partei\n", "\n", ""))
@@ -587,7 +546,7 @@ object Analysis {
       .mapValues(tweets => tweets.map(tweet => getUser(tweet)))
       .groupBy(_._1).mapValues(_.map(_._2.size))
 
-    val minTweets = 10;
+    val minTweets = 10
 
     val processedParty = processedAll.groupBy(x => (x._1._1, x._1._3)).mapValues(x => x.map(_._2.sum).sum).sortBy(-_._2)
     println(processedParty.collect().take(minTweets).mkString("Aktivste Nutzer  pro Partei\n", "\n", ""))
@@ -762,7 +721,7 @@ object Analysis {
         .mapValues(_.size)
         .sortBy(-_._2)
 
-    val minUrls = 1;
+    val minUrls = 1
 
     val processedYearAndParty = processedAll.groupBy(elem => (elem._1._1, elem._1._2._1, elem._1._3)).mapValues(x => x.map(_._2).sum).sortBy(-_._2).filter(_._2 > minUrls)
     println(processedYearAndParty.collect().take(25).mkString("Anzahl Urls pro Jahr pro Partei\n", "\n", ""))
