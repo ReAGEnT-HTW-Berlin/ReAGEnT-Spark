@@ -67,6 +67,8 @@ object Utilities {
     str match {
       case "youtu.be" => "www.youtube.com"
       case "fb.me" => "www.facebook.com"
+      case "www.google.com" => "www.google.de"
+      case "goo.gl" => "www.google.de"
       case _ => str
     }
   }
