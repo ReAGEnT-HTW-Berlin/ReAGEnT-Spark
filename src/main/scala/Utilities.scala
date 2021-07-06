@@ -42,13 +42,7 @@ object Utilities {
 
   def getLikesCount(document: Document): Int = document.getInteger("likes_count")
 
-  def getMediaCount(document: Document): Int = {
-    if(document.get("photos").asInstanceOf[util.ArrayList[String]].size()>=1){
-      document.get("photos").asInstanceOf[util.ArrayList[String]].size()
-    }else{
-      document.getInteger("video")
-    }
-  }
+  def getMediaCount(document: Document): Int = document.getInteger("video")
 
   def getUser(document:Document): String = document.getString("username")
 
