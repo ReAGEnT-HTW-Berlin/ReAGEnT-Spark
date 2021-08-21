@@ -32,23 +32,8 @@ object Analysis {
 
 
     if (saveToDB) {
-      /*val docsAll = processedAll.map(elem => Document.parse("{_id: {party: \"" + elem._1._1 + "\"" +
-        ",year: " + elem._1._2._1 +
-        ",month: " + elem._1._2._2 +
-        ",day: " + elem._1._2._3 +
-        ",hour: " + elem._1._2._5 + "},count: " + elem._2 + "}"))
-      docsAll.saveToMongoDB(WriteConfig(Map("uri" -> (sys.env("REAGENT_MONGO") + "examples.countTotalByHourAndParty?authSource=examples"))))
 
-      val docsParty = processedParty.map(elem => Document.parse("{_id: {party: \"" + elem._1 + "\"},count: " + elem._2 + "}"))
-      docsParty.saveToMongoDB(WriteConfig(Map("uri" -> (sys.env("REAGENT_MONGO") + "examples.countTotalByParty?authSource=examples"))))
-
-      val docsHour = processedHour.map(elem => Document.parse("{_id: {" +
-        ",year: " + elem._1._1 +
-        ",month: " + elem._1._2 +
-        ",day: " + elem._1._3 +
-        ",hour: " + elem._1._5 + "},count: " + elem._2 + "}"))
-      docsHour.saveToMongoDB(WriteConfig(Map("uri" -> (sys.env("REAGENT_MONGO") + "examples.countTotalByHour?authSource=examples"))))*/
-
+      //Speichert die Daten in die Datenbank. Dabei werden Sie zu JSONs umgewandelt
       val docsYearAndParty = processedYearAndParty.map(elem => Document.parse("{_id: {party: \"" + elem._1._1 + "\",year: " + elem._1._2 + "},count: " + elem._2 + "}"))
       docsYearAndParty.saveToMongoDB(WriteConfig(Map("uri" -> (sys.env("REAGENT_MONGO") + "examples.countTotalByYear?authSource=examples"))))
 
@@ -714,7 +699,7 @@ object Analysis {
     }
   }
 
-  def countUrls(rdd: RDD[Document], saveToDB: Boolean = false):Unit = {
+  def countUrls(rdd: RDD[Document], saveToDB: Boolean = false): Unit = {
     val processedAll =
       rdd.flatMap(tweet => getUrls(tweet).map(url => (getParty(tweet), getTime(tweet), url)))
         .groupBy(identity)

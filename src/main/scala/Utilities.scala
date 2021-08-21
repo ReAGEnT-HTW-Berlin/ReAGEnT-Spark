@@ -17,9 +17,20 @@ object Utilities {
     document.getBoolean("retweet")
   }
 
+  /**
+   * Wandelt den String-Timestamp von Twitter in ein LocalDateTime Object um
+   * @param date Date Feld vom Tweet
+   * @return LocalDateTime, vom angegeben Zeitpunkt
+   */
   def transformTwitterDate(date: String): LocalDateTime = LocalDateTime.parse(date.splitAt(19)._1, dtf_new).plusHours(2)
 
   //Methoden für Zugriff auf BSON Tweet-Darstellung
+
+  /**
+   * Erfragt vom Tweet json-Objekt, was der Inhalt des Tweets ist
+   * @param document Tweet
+   * @return String, Tweet-Text
+   */
   def getText(document: Document): String = document.getString("tweet")
 
   def getParty(document: Document): String = document.getString("partei")
@@ -38,12 +49,22 @@ object Utilities {
     (timeStamp.getYear, timeStamp.getMonth.getValue, timeStamp.getDayOfMonth,timeStamp.getDayOfYear, timeStamp.getHour, timeStamp.getDayOfWeek.name())
   }
 
+  /**
+   * Erfragt vom Tweet json-Objekt, wie viele Antworten der Tweet erhalten hat
+   * @param document Tweet
+   * @return Int, Anzahl Antworten
+   */
   def getRepliesCount(document: Document): Int = document.getInteger("replies_count")
 
   def getLikesCount(document: Document): Int = document.getInteger("likes_count")
 
   def getMediaCount(document: Document): Int = document.getInteger("video")
 
+  /**
+   * Erfragt vom Tweet json-Objekt, wer den Tweet verfasst hat
+   * @param document Tweet
+   * @return String, Username vom Author
+   */
   def getUser(document:Document): String = document.getString("username")
 
   def getTaggedUserList(document: Document):List[String] = {
@@ -53,6 +74,11 @@ object Utilities {
 
   def getRetweetsCount(document:Document): Int = document.getInteger("retweets_count")
 
+  /**
+   * Erfragt vom Tweet json-Objekt, welche URLs verwendet wurden
+   * @param document Tweet
+   * @return List[String] an URLs
+   */
   def getUrls(document:Document): List[String] = {
     document
       .get("urls")
@@ -63,6 +89,11 @@ object Utilities {
       .map(mergeSameUrls)
   }
 
+  /**
+   * Vereinheitlicht URLs, die auf die selbe Seite weiterleiten
+   * @param str Urspruengliche URL
+   * @return Umgewandelte URL
+   */
   def mergeSameUrls(str: String): String = {
     str match {
       case "youtu.be" => "www.youtube.com"

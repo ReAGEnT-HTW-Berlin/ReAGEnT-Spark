@@ -13,7 +13,7 @@ object Main {
       .config("spark.testing.memory", 2147480000)
       .getOrCreate()
 
-
+    // Laden der Tweets aus der DB
     val tweets = MongoSpark.load(sparkSession)
     tweets.createOrReplaceTempView("tweets")
 
@@ -34,7 +34,7 @@ object Main {
     avgRetweets(rdd, saveToDB = true)
     countUrls(rdd, saveToDB = true)
 
-
+    // Wenn 'Hello World' geprintet wird, ist das Programm erfolgreich durchgelaufen
     println("Hello World")
   }
 
