@@ -64,6 +64,11 @@ object Utilities {
       .get("hashtags").asInstanceOf[util.ArrayList[String]].asScala.toList
   }
 
+  /**
+   * Erhaelt das Tweet json-Objekt und erstellt den Timestamp von ihm
+   * @param document Tweet
+   * @return (Int, Int, Int, Int, Int, String) mit folgendem Format - (Jahr, Monat, Tag des Monats, Tag des Jahres, Stunde, Wochentag)
+   */
   def getTime(document: Document): (Int, Int, Int, Int, Int, String) = {
     val timeStamp = getTimestamp(document)
     (timeStamp.getYear, timeStamp.getMonth.getValue, timeStamp.getDayOfMonth,timeStamp.getDayOfYear, timeStamp.getHour, timeStamp.getDayOfWeek.name())
@@ -76,8 +81,18 @@ object Utilities {
    */
   def getRepliesCount(document: Document): Int = document.getInteger("replies_count")
 
+  /**
+   * Erfragt vom Tweet json-Objekt, die Anzahl der Likes
+   * @param document Tweet
+   * @return Int, welche die Anzahl der Likes ist
+   */
   def getLikesCount(document: Document): Int = document.getInteger("likes_count")
 
+  /**
+   * Erfragt vom Tweet json-Objekt, ob medien genutzt wurden
+   * @param document Tweet
+   * @return Int, 0 wenn keine Medien genutzt werden 1 wenn Medien genutzt werden
+   */
   def getMediaCount(document: Document): Int = document.getInteger("video")
 
   /**
@@ -87,11 +102,21 @@ object Utilities {
    */
   def getUser(document:Document): String = document.getString("username")
 
+  /**
+   * Erfragt vom Tweet json-Objekt, welche Benutzer alles gementioned wurden
+   * @param document Tweet
+   * @return List[String] mit all den Benutzern die gementioned wurden
+   */
   def getTaggedUserList(document: Document):List[String] = {
     document.get("mentions").asInstanceOf[util.ArrayList[Document]].asScala
       .map(_.getString("screen_name")).toList
   }
 
+    /**
+     * Erfragt vom Tweet json-Objekt, wie oft er retweeted wurde
+     * @param document Tweet
+     * @return Int, Anzahl der Retweets
+     */
   def getRetweetsCount(document:Document): Int = document.getInteger("retweets_count")
 
   /**
