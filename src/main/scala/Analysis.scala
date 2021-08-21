@@ -6,6 +6,13 @@ import org.bson.Document
 
 object Analysis {
 
+  /**
+   * Das Prinzip der nachfolgenden Methoden folgt der selben Logik wie dieser
+   *
+   * Grundsaetzlich werden eine Menge von Tweets genommen und Operationen wie das Zaehlen darauf ausgefuehrt
+   * @param rdd, Resilient Distributed Dataset, Spark format in den sich die Tweets befinden
+   * @param saveToDB, Boolean ob Berechnungen/Erkenntnisse in die Datenbank geschrieben werden sollen
+   */
   def countTotal(rdd: RDD[Document], saveToDB: Boolean = false): Unit = {
     val processedAll =
       rdd

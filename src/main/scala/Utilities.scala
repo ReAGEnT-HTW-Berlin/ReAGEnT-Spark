@@ -4,15 +4,15 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util
 import scala.collection.JavaConverters._
-import scala.util.matching.Regex
 
 object Utilities {
   val dtf_new: DateTimeFormatter = DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm:ss")
 
-  def getAllWithRegex(text: String, pattern: Regex): List[String] = {
-    pattern.findAllIn(text).toList
-  }
-
+  /**
+   * Erfragt vom Tweet json-Objekt, ob er ein Retweet oder keiner ist
+   * @param document Tweet
+   * @return Boolean, ob es sich um ein Retweet handelt oder nicht
+   */
   def isRetweet(document: Document): Boolean = {
     document.getBoolean("retweet")
   }
@@ -33,12 +33,32 @@ object Utilities {
    */
   def getText(document: Document): String = document.getString("tweet")
 
+  /**
+   * Erfragt vom Tweet json-Objekt, von welcher Partei er abgesetzt wurde
+   * @param document Tweet
+   * @return String, welcher den Parteinamen zurueckgibt
+   */
   def getParty(document: Document): String = document.getString("partei")
 
+  /**
+   * Erfragt vom Tweet json-Objekt, wann dieser abgesetzt wurde
+   * @param document Tweet
+   * @return Datetime, gibt den kompletten Timestamp zurueck
+   */
   def getTimestamp(document: Document): LocalDateTime = transformTwitterDate(document.getString("created_at"))
 
+  /**
+   * Erfragt vom Tweet json-Objekt, von welchen Engeraet er abgesetzt wurde
+   * @param document Tweet
+   * @return String, welcher den Namen des Engeraets enthaelt  Bspl.("iphone")
+   */
   def getSource(document: Document): String = document.get("data").asInstanceOf[Document].getString("source")
 
+  /**
+   * Erfragt vom Tweet json-Objekt, welche Hashtags benutzt wurden
+   * @param document Tweet
+   * @return List[String], welcher alle Hashtags enthaelt
+   */
   def getHashtags(document: Document): List[String] = {
     document
       .get("hashtags").asInstanceOf[util.ArrayList[String]].asScala.toList

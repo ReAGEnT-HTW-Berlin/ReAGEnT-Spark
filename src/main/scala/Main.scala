@@ -6,6 +6,7 @@ object Main {
 
   def main(args: Array[String]): Unit = {
 
+    // Sparksession erstellen
     val sparkSession = SparkSession.builder()
       .master("local")
       .appName("MongoSparkConnectorIntro")
@@ -17,9 +18,12 @@ object Main {
     val tweets = MongoSpark.load(sparkSession)
     tweets.createOrReplaceTempView("tweets")
 
+    // SparkSession erstellen
     val sc = sparkSession.sparkContext
     val rdd = MongoSpark.load(sc).rdd
 
+    // Aufruf der Analyse Methoden
+    //wenn, saveToDB = true, werden die berechneten Werte in eine Datenbank (hier: MongoDB) gespeichert
     countTotal(rdd, saveToDB = true)
     countByHashtag(rdd, saveToDB = true)
     avgTweetLength(rdd, saveToDB = true)
